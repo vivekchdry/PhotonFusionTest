@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Activation;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,34 +35,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public Button jumpButton;
     public Button talkButton;
-
-
-
-    // private void Start()
-    // {
-    //     if (controller == null)
-    //     {
-    //         if (transform.TryGetComponent<CharacterController>(out CharacterController out_controller))
-    //         {
-    //             controller = out_controller;
-    //         }
-    //     }
-
-    //     if (inputHandler == null)
-    //     {
-    //         if (transform.TryGetComponent<InputHandler>(out InputHandler out_inputHandler))
-    //         {
-    //             inputHandler = out_inputHandler;
-    //         }
-    //     }
-    //     if (movementRotationHandler == null)
-    //     {
-    //         if (transform.TryGetComponent<MovementRotationHandler>(out MovementRotationHandler out_movementRotationHandler))
-    //         {
-    //             movementRotationHandler = out_movementRotationHandler;
-    //         }
-    //     }
-    // }
+    public float _rotationSpeed;
 
     private void OnEnable()
     {
@@ -112,30 +86,6 @@ public class ThirdPersonController : MonoBehaviour
     }
 
 
-    // private void Update()
-    // {
-    //     if (inputHandler == null)
-    //     {
-    //         return;
-    //     }
-    //     if (movementRotationHandler == null)
-    //     {
-    //         return;
-    //     }
-    //     if (touchDetect == null)
-    //     {
-    //         return;
-    //     }
-    //     cinemachineFreeLook.m_XAxis.Value += touchDetect.TouchDistance.x * 200 * sensitivityX * Time.deltaTime;
-    //     cinemachineFreeLook.m_YAxis.Value += touchDetect.TouchDistance.y * sensitivityY * Time.deltaTime;
-
-    //      transform.position += movementRotationHandler.MoveTheObject(inputHandler.horizontalValue, inputHandler.verticalValue);
-    //      transform.rotation = movementRotationHandler.RotateTheObject(inputHandler.directionValue, inputHandler.horizontalValue, inputHandler.horizontalValue);
-    // }
-
-
-
-
     void Update()
     {
 
@@ -151,6 +101,13 @@ public class ThirdPersonController : MonoBehaviour
         MakePlayerJumpOrFallAFterJump();
 
         MoveCameraUsingTouchPanel();
+
+#if UNITY_EDITOR
+        if (Input.GetButtonDown("Jump"))
+        {
+            CalcutalePlayerJump();
+        }
+#endif
     }
 
     private void MakePlayerJumpOrFallAFterJump()
@@ -169,11 +126,23 @@ public class ThirdPersonController : MonoBehaviour
 
     private void MoveThePlayer()
     {
-        Vector3 movement = movementRotationHandler.MoveTheObject(inputHandler.directionValue);
+        Vector3 movement = movementRotationHandler.MovementDirection(inputHandler.directionValue);
         controller.Move(movement * Time.deltaTime * playerSpeed);
+
+        RotateThePlayer(movement);
+
+        // if (movement != Vector3.zero)
+        // {
+        //     gameObject.transform.forward = movement;
+        // }
+
+    }
+
+    private void RotateThePlayer(Vector3 movement)
+    {
         if (movement != Vector3.zero)
         {
-            gameObject.transform.forward = movement;
+            transform.rotation = movementRotationHandler.RotateTheObject(transform, movement);
         }
     }
 

@@ -21,9 +21,6 @@ public class InputHandler : MonoBehaviour
             return;
         }
 
-        // if (fixedJoystick.Direction != Vector2.zero)
-        //     Debug.Log($"{fixedJoystick.Horizontal} {fixedJoystick.Vertical} {fixedJoystick.Direction}");
-
 #if UNITY_EDITOR
 
         if (forceJoystickInput)
@@ -34,8 +31,8 @@ public class InputHandler : MonoBehaviour
         }
         else
         {
-            horizontalValue = Input.GetAxis("Horizontal");
-            verticalValue = Input.GetAxis("Vertical");
+            horizontalValue = Input.GetAxisRaw("Horizontal");
+            verticalValue = Input.GetAxisRaw("Vertical");
             directionValue = new Vector2(horizontalValue, verticalValue);
         }
 #else
