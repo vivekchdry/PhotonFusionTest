@@ -5,6 +5,8 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     [SerializeField]
+    private bool forceJoystickInput;
+    [SerializeField]
     private FixedJoystick fixedJoystick;
 
     public float horizontalValue { get; private set; }
@@ -19,11 +21,29 @@ public class InputHandler : MonoBehaviour
             return;
         }
 
-        if (fixedJoystick.Direction != Vector2.zero)
-            Debug.Log($"{fixedJoystick.Horizontal} {fixedJoystick.Vertical} {fixedJoystick.Direction}");
+        // if (fixedJoystick.Direction != Vector2.zero)
+        //     Debug.Log($"{fixedJoystick.Horizontal} {fixedJoystick.Vertical} {fixedJoystick.Direction}");
+
+#if UNITY_EDITOR
+
+        if (forceJoystickInput)
+        {
+            directionValue = fixedJoystick.Direction;
+            horizontalValue = fixedJoystick.Horizontal;
+            verticalValue = fixedJoystick.Vertical;
+        }
+        else
+        {
+            horizontalValue = Input.GetAxis("Horizontal");
+            verticalValue = Input.GetAxis("Vertical");
+            directionValue = new Vector2(horizontalValue, verticalValue);
+        }
+#else
 
         directionValue = fixedJoystick.Direction;
         horizontalValue = fixedJoystick.Horizontal;
         verticalValue = fixedJoystick.Vertical;
+#endif
+
     }
 }
