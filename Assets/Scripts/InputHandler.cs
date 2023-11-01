@@ -25,22 +25,28 @@ public class InputHandler : MonoBehaviour
 
         if (forceJoystickInput)
         {
-            directionValue = fixedJoystick.Direction;
-            horizontalValue = fixedJoystick.Horizontal;
-            verticalValue = fixedJoystick.Vertical;
+            GetInputDataFromJoystick();
         }
         else
         {
-            horizontalValue = Input.GetAxisRaw("Horizontal");
-            verticalValue = Input.GetAxisRaw("Vertical");
-            directionValue = new Vector2(horizontalValue, verticalValue);
+            GetInputDataFromKeyboard();
         }
 #else
+            GetInputDataFromJoystick();
+#endif
 
+    }
+
+    public void GetInputDataFromJoystick()
+    {
         directionValue = fixedJoystick.Direction;
         horizontalValue = fixedJoystick.Horizontal;
         verticalValue = fixedJoystick.Vertical;
-#endif
-
+    }
+    public void GetInputDataFromKeyboard()
+    {
+        horizontalValue = Input.GetAxisRaw("Horizontal");
+        verticalValue = Input.GetAxisRaw("Vertical");
+        directionValue = new Vector2(horizontalValue, verticalValue);
     }
 }
