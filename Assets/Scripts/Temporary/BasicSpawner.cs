@@ -61,6 +61,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             data.direction = HudManager.instance.MovementDirection(HudManager.instance.fixedJoystick.Direction);
             data.jumpButtonPressed = HudManager.instance.jumpButtonPressed;
+            data.talkButtonPressed = HudManager.instance.talkButtonPressed;
         }
         // if (Input.GetKey(KeyCode.Space))
         //     data.jumpButtonPressed = true;
@@ -156,24 +157,12 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log("OnPlayerJoined");
         if (runner.IsServer)
         {
-            // Create a unique position for the player
+
             Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 2, 0);
             NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
-            // Keep track of the player avatars so we can remove it when they disconnect
+            networkPlayerObject.transform.name = networkPlayerObject.Name;
             _spawnedCharacters.Add(player, networkPlayerObject);
-            // if (HudManager.instance != null)
-            // {
-            //     HudManager.instance.cinemachineFreeLook.m_Follow = networkPlayerObject.transform.GetChild(0).transform;
-            //     HudManager.instance.cinemachineFreeLook.m_LookAt = networkPlayerObject.transform.GetChild(0).transform;
-            // }
-            // if (networkPlayerObject.HasInputAuthority)
-            // {
-            //     if (HudManager.instance != null)
-            //     {
-            //         HudManager.instance.cinemachineFreeLook.m_Follow = networkPlayerObject.transform.GetChild(0).transform;
-            //         HudManager.instance.cinemachineFreeLook.m_LookAt = networkPlayerObject.transform.GetChild(0).transform;
-            //     }
-            // }
+
 
         }
     }

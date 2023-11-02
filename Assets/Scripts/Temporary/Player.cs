@@ -1,4 +1,5 @@
 using Fusion;
+using TMPro;
 using UnityEngine;
 
 public class Player : NetworkBehaviour, IAfterSpawned
@@ -69,6 +70,16 @@ public class Player : NetworkBehaviour, IAfterSpawned
                 }
                 networkCharacterControllerPrototype.Jump(false);
             }
+            if (data.talkButtonPressed)
+            {
+                if (networkObject.HasInputAuthority && HudManager.instance != null)
+                {
+                    //RPC_SendMessage(networkObject.Name);
+                    RPC_SendMessage($"Player_{networkObject.Id} Talking.");
+                    //RPC_SendMessage($"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    HudManager.instance.talkButtonPressed = false;
+                }
+            }
         }
 
 
@@ -114,5 +125,44 @@ public class Player : NetworkBehaviour, IAfterSpawned
             textLookAtCameraLocally.myLocalCamera = Camera.main.transform;
             textLookAtCameraLocally.textLookAtCamera = true;
         }
+        _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        RPC_SendMessage($"Player_{networkObject.Id}");
+    }
+
+    private TextMeshProUGUI _messagesText;
+    [Networked(OnChanged = nameof(OnMessageToShowChanged))] public NetworkString<_128> messageToShow { get; set; }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SendMessage(string message, RpcInfo info = default)
+    {
+        Debug.Log("RPC_SendMessage PlayerCode");
+        //if (!networkObject.HasInputAuthority)
+
+        // if (_messagesText == null)
+        // {
+        //     _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        // }
+        // if (info.IsInvokeLocal)
+        //     message = $"You said: {message}\n";
+        // else
+        //     message = $"Some other player said: {message}\n";
+        messageToShow = message;
+        // _messagesText.text = messageToShow;
+    }
+
+
+    // Has to be public static void
+    public static void OnMessageToShowChanged(Changed<Player> changed)
+    {
+        changed.Behaviour.OnMessageToShowChanged();
+    }
+
+    private void OnMessageToShowChanged()
+    {
+        if (_messagesText == null)
+        {
+            _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        }
+        _messagesText.text = messageToShow.ToString();
     }
 }

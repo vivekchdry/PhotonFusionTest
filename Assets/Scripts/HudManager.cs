@@ -18,6 +18,7 @@ public class HudManager : MonoBehaviour
     public Button joinDemoGame;
 
     public bool jumpButtonPressed;
+    public bool talkButtonPressed;
 
     public float sensitivityX = 0.005f;
     public float sensitivityY = -0.005f;
@@ -43,6 +44,7 @@ public class HudManager : MonoBehaviour
 #endif
 
         jumpButton.onClick.AddListener(() => { jumpButtonPressed = true; });
+        talkButton.onClick.AddListener(() => { talkButtonPressed = true; });
 
 
     }
