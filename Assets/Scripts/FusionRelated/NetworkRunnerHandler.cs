@@ -7,106 +7,106 @@ using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
+public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 {
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        Debug.Log("OnConnectedToServer");
+        // Debug.Log($"{nameof(BasicSpawner)} OnConnectedToServer");
     }
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
-        Debug.Log("OnConnectFailed");
+        // Debug.Log($"{nameof(BasicSpawner)} OnConnectFailed");
     }
 
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
     {
-        Debug.Log("OnConnectRequest");
+        // Debug.Log($"{nameof(BasicSpawner)} OnConnectRequest");
     }
 
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
     {
-        Debug.Log("OnCustomAuthenticationResponse");
+        // Debug.Log($"{nameof(BasicSpawner)} OnCustomAuthenticationResponse");
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner)
     {
-        Debug.Log("OnDisconnectedFromServer");
+        // Debug.Log($"{nameof(BasicSpawner)} OnDisconnectedFromServer");
     }
 
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
     {
-        Debug.Log("OnHostMigration");
+        // Debug.Log($"{nameof(BasicSpawner)} OnHostMigration");
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        Debug.Log("OnInput");
-        var data = new NetworkInputData();
+        // Debug.Log($"{nameof(BasicSpawner)} OnInput");
+        // var data = new NetworkInputData();
 
 
-        // if (Input.GetKey(KeyCode.W))
-        //     data.direction += Vector3.forward;
+        // // if (Input.GetKey(KeyCode.W))
+        // //     data.direction += Vector3.forward;
 
-        // if (Input.GetKey(KeyCode.S))
-        //     data.direction += Vector3.back;
+        // // if (Input.GetKey(KeyCode.S))
+        // //     data.direction += Vector3.back;
 
-        // if (Input.GetKey(KeyCode.A))
-        //     data.direction += Vector3.left;
+        // // if (Input.GetKey(KeyCode.A))
+        // //     data.direction += Vector3.left;
 
-        // if (Input.GetKey(KeyCode.D))
-        //     data.direction += Vector3.right;
-
-        if (HudManager.instance != null)
-        {
-            data.direction = HudManager.instance.MovementDirection(HudManager.instance.fixedJoystick.Direction);
-            data.jumpButtonPressed = HudManager.instance.jumpButtonPressed;
-            data.talkButtonPressed = HudManager.instance.talkButtonPressed;
-        }
-        // if (Input.GetKey(KeyCode.Space))
-        //     data.jumpButtonPressed = true;
-
-        input.Set(data);
+        // // if (Input.GetKey(KeyCode.D))
+        // //     data.direction += Vector3.right;
 
         // if (HudManager.instance != null)
         // {
-        //     HudManager.instance.MoveCameraUsingTouchPanel();
+        //     //data.direction = HudManager.instance.MovementDirection(HudManager.instance.fixedJoystick.Direction);
+        //     data.jumpButtonPressed = HudManager.instance.jumpButtonPressed;
+        //     data.talkButtonPressed = HudManager.instance.talkButtonPressed;
         // }
+        // // if (Input.GetKey(KeyCode.Space))
+        // //     data.jumpButtonPressed = true;
+
+        // input.Set(data);
+
+        // // if (HudManager.instance != null)
+        // // {
+        // //     HudManager.instance.MoveCameraUsingTouchPanel();
+        // // }
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
     {
-        Debug.Log("OnInputMissing");
+        // Debug.Log($"{nameof(BasicSpawner)} OnInputMissing");
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
     {
-        Debug.Log("OnReliableDataReceived");
+        // Debug.Log($"{nameof(BasicSpawner)} OnReliableDataReceived");
     }
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        Debug.Log("OnSceneLoadDone");
+        // Debug.Log($"{nameof(BasicSpawner)} OnSceneLoadDone");
     }
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
-        Debug.Log("OnSceneLoadStart");
+        // Debug.Log($"{nameof(BasicSpawner)} OnSceneLoadStart");
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
-        Debug.Log("OnSessionListUpdated");
+        // Debug.Log($"{nameof(BasicSpawner)} OnSessionListUpdated");
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        Debug.Log("OnShutdown");
+        // Debug.Log($"{nameof(BasicSpawner)} OnShutdown");
     }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
     {
-        Debug.Log("OnUserSimulationMessage");
+        // Debug.Log($"{nameof(BasicSpawner)} OnUserSimulationMessage");
     }
 
     private NetworkRunner _runner;
@@ -128,7 +128,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     private void Awake()
     {
-        Debug.Log("Awake " + nameof(BasicSpawner));
+        Debug.Log("Awake " + nameof(NetworkRunnerHandler));
     }
 
     async void StartGame(GameMode mode)
@@ -154,7 +154,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log("OnPlayerJoined");
+        Debug.Log($"{nameof(NetworkRunnerHandler)} OnPlayerJoined");
         if (runner.IsServer)
         {
 
@@ -169,7 +169,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log("OnPlayerLeft");
+        Debug.Log($"{nameof(NetworkRunnerHandler)} OnPlayerLeft");
         // Find and remove the players avatar
         if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
         {
