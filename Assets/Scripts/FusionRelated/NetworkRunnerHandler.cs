@@ -32,13 +32,25 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     //     }
     // }
 
+    private void Awake()
+    {
+        Debug.Log("Awake " + nameof(NetworkRunnerHandler));
+
+        //networkRunner = gameObject.AddComponent<NetworkRunner>();
+    }
 
     private void Start()
     {
+        OnJoinLobby();
+    }
+
+    [ContextMenu("CustomStart")]
+    private void CustomStart()
+    {
         Debug.Log("Start " + nameof(NetworkRunnerHandler));
 
-        networkRunner = gameObject.AddComponent<NetworkRunner>();
-        //networkRunner.name = "Network Runner";
+        // networkRunner = gameObject.AddComponent<NetworkRunner>();
+        // networkRunner.name = "Network Runner";
 
 
         if (SceneManager.GetActiveScene().name != "GameScene")
@@ -50,13 +62,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    protected virtual Task InitializeNetworkRunner(NetworkRunner networkRunner, GameMode gameMode, string sessionName, SceneRef scene, NetAddress address, Action<NetworkRunner> initialized)
+    protected virtual async Task InitializeNetworkRunner(NetworkRunner networkRunner, GameMode gameMode, string sessionName, SceneRef scene, NetAddress address, Action<NetworkRunner> initialized)
     {
         Debug.Log("InitializeNetworkRunner " + nameof(NetworkRunnerHandler));
         var sceneManager = GetSceneManager(networkRunner);
         networkRunner.ProvideInput = true;
 
-        return networkRunner.StartGame(new StartGameArgs()
+        var result = await networkRunner.StartGame(new StartGameArgs()
         {
             GameMode = gameMode,
             SessionName = sessionName,
@@ -67,6 +79,15 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             SceneManager = sceneManager,
 
         });
+
+        if (result.Ok)
+        {
+            Debug.Log("OK StartGame " + nameof(NetworkRunnerHandler));
+        }
+        else
+        {
+            Debug.LogError($"Failed to Start: {result.ShutdownReason}");
+        }
     }
 
     INetworkSceneManager GetSceneManager(NetworkRunner networkRunner)
@@ -86,30 +107,31 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnJoinLobby()
     {
         Debug.Log("OnJoinLobby " + nameof(NetworkRunnerHandler));
-        var clientTask = JoinLobby();
+        //var clientTask = JoinLobby();
         //var networkPlayerSpawner = Instantiate(Prefab_networkPlayerSpawner);
     }
 
-    private async Task JoinLobby()
+    public async Task JoinLobby()
     {
         Debug.Log("JoinLobby " + nameof(NetworkRunnerHandler));
-        string lobbyId = "TestLobbyId";
+        string lobbyId = "CustomLobbyId";
         var result = await networkRunner.JoinSessionLobby(SessionLobby.Custom, lobbyId);
 
-        if (!result.Ok)
+        if (result.Ok)
         {
-            Debug.Log($"Unable to Join Lobby {lobbyId}");
+            Debug.Log($"Successfully Joined Lobby {lobbyId}");
         }
         else
         {
-            Debug.Log($"Successfully Joined Lobby {lobbyId}");
+            Debug.Log($"Unable to Join Lobby {lobbyId} {result.ShutdownReason}");
         }
     }
 
     public void CreateGame(string sessionName, string sceneName)
     {
         Debug.Log($"CreateGame {sessionName} {sceneName} {nameof(NetworkRunnerHandler)}");
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null);
+        //var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
     }
 
     public void JoinGame(SessionInfo sessionInfo)
@@ -121,7 +143,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void HostButtonTemp()
     {
         Debug.Log($"HostButtonTemp");
-        CreateGame("TestSession 1", "GameScene");
+        CreateGame("TestSession 1", "LobbyScene");
     }
     public void JoinButtonTemp()
     {
@@ -187,7 +209,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
-        // Debug.Log($"{nameof(BasicSpawner)} OnSessionListUpdated");
+        Debug.Log($"{nameof(NetworkRunnerHandler)} OnSessionListUpdated");
+
+        if (sessionList.Count > 0)
+        {
+            foreach (SessionInfo item in sessionList)
+            {
+                Debug.Log($"{nameof(NetworkRunnerHandler)} {item.Name}");
+            }
+        }
+
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)

@@ -5,6 +5,7 @@ using Fusion;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 public class SessionListHandler : MonoBehaviour
 {
@@ -13,11 +14,12 @@ public class SessionListHandler : MonoBehaviour
     [SerializeField]
     private SessionInfoListUiItem prefab;
     [SerializeField]
-    private Button goback;
+    private UnityEngine.UI.Button goback;
     [SerializeField]
     private ScrollView scrollView;
     [SerializeField]
     private Transform scrollViewContent;
+
 
     public void ClearList()
     {
