@@ -106,6 +106,7 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         myInput.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);
         myInput.OnScreenButtons.Set(HudButtons.TALK_BUTTON, HudManager.instance.talkButtonPressed);
+        //myInput.jumpButtonPressed = HudManager.instance.jumpButtonPressed;
 
         myInput.direction = MovementDirection();
 

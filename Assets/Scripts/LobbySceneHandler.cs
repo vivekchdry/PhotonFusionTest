@@ -8,24 +8,19 @@ using EasyUI.Toast;
 public class LobbySceneHandler : MonoBehaviour
 {
 
-    [SerializeField]
-    private TextMeshProUGUI Text_gameTitle;
-    [SerializeField]
-    private TextMeshProUGUI Text_playerDisplayName;
-    [SerializeField]
-    private TMP_InputField Input_playerName;
-    [SerializeField]
-    private TMP_InputField Input_sessionName;
-    [SerializeField]
-    private Button Button_hostNewGame;
-    [SerializeField]
-    private Button Button_enterGameLobby;
-    [SerializeField]
-    private GameObject Panel_hostOrJoinSession;
-    [SerializeField]
-    private GameObject Panel_lisAllSessions;
+    public TextMeshProUGUI Text_gameTitle;
+    public TextMeshProUGUI Text_playerDisplayName;
 
-    public string playerInGameName { get; private set; }
+    public TMP_InputField Input_playerName;
+    public TMP_InputField Input_sessionName;
+    public Button Button_hostNewGame;
+    public Button Button_enterGameLobby;
+    public GameObject Panel_hostOrJoinSession;
+    public GameObject Panel_lisAllSessions;
+
+
+    public GameObject LoadingAnimationObject;
+    private NetworkRunnerHandler networkRunnerHandler;
 
 
 
@@ -33,28 +28,27 @@ public class LobbySceneHandler : MonoBehaviour
     {
         // Subscribe to the EndEdit event.
         Input_playerName.onEndEdit.AddListener(PlayerName_OnEndEdit);
-
-
+        Button_enterGameLobby.onClick.AddListener(ShowPanel_ListAllSession);
 
     }
     private void OnDisable()
     {
         // Un-Subscribe to the EndEdit event.
         Input_playerName.onEndEdit.RemoveListener(PlayerName_OnEndEdit);
+        Button_enterGameLobby.onClick.RemoveListener(ShowPanel_ListAllSession);
     }
 
     private void PlayerName_OnEndEdit(string inputText)
     {
         //Debug.Log("User finished typing: " + inputText);
-        playerInGameName = inputText;
-        Text_playerDisplayName.text = playerInGameName;
+        networkRunnerHandler.playerInGameName = inputText;
+        Text_playerDisplayName.text = networkRunnerHandler.playerInGameName;
 
         if (!CheckPlayerName())
         {
             Toast.Show("Please enter <b><color=yellow>PLAYER NAME</color></b>", 1.5f, ToastPosition.BottomCenter);
             Button_hostNewGame.interactable = false;
             Button_enterGameLobby.interactable = false;
-
         }
         else
         {
@@ -62,12 +56,12 @@ public class LobbySceneHandler : MonoBehaviour
             Button_enterGameLobby.interactable = true;
         }
 
-        SwitchGameHeader();
+        //SwitchGameHeader();
     }
 
     bool CheckPlayerName()
     {
-        return playerInGameName != "" && playerInGameName != null && playerInGameName != string.Empty;
+        return networkRunnerHandler.playerInGameName != "" && networkRunnerHandler.playerInGameName != null && networkRunnerHandler.playerInGameName != string.Empty;
     }
 
     public void ShowPanel_HostOrJoinSession()
@@ -97,5 +91,33 @@ public class LobbySceneHandler : MonoBehaviour
         }
     }
 
+    public void Init()
+    {
+        Text_gameTitle.gameObject.SetActive(true);
+        Text_playerDisplayName.gameObject.SetActive(false);
+        Button_hostNewGame.interactable = false;
+        Button_enterGameLobby.interactable = false;
+        Panel_hostOrJoinSession.gameObject.SetActive(true);
+        Panel_lisAllSessions.gameObject.SetActive(false);
+        Text_playerDisplayName.text = string.Empty;
+        //playerInGameName = string.Empty;
+        networkRunnerHandler = FindAnyObjectByType<NetworkRunnerHandler>();
+
+        networkRunnerHandler.playerInGameName = string.Empty;
+
+    }
+
+    public IEnumerator StartFakeLoading(bool showAnimation)
+    {
+        yield return new WaitForSeconds(0.1f);
+        LoadingAnimationObject.SetActive(showAnimation);
+        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase>";
+        // yield return new WaitForSeconds(0.5f);
+        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>.</size>";
+        // yield return new WaitForSeconds(0.5f);
+        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>..</size>";
+        // yield return new WaitForSeconds(0.5f);
+        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>...</size>";
+    }
 
 }

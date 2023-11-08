@@ -14,8 +14,6 @@ public class HudManager : MonoBehaviour
     public CinemachineFreeLook cinemachineFreeLook;
     public Button jumpButton;
     public Button talkButton;
-    public Button hostDemoGame;
-    public Button joinDemoGame;
 
     public bool jumpButtonPressed;
     public bool talkButtonPressed;

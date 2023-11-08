@@ -9,16 +9,11 @@ using UnityEngine.UI;
 
 public class SessionListHandler : MonoBehaviour
 {
-    [SerializeField]
-    private TextMeshProUGUI sessionListStatus;
-    [SerializeField]
-    private SessionInfoListUiItem prefab;
-    [SerializeField]
-    private UnityEngine.UI.Button goback;
-    [SerializeField]
-    private ScrollView scrollView;
-    [SerializeField]
-    private Transform scrollViewContent;
+    public TextMeshProUGUI sessionListStatus;
+    public SessionInfoListUiItem prefab;
+    public UnityEngine.UI.Button goback;
+    public ScrollView scrollView;
+    public Transform scrollViewContent;
 
 
     public void ClearList()
@@ -41,6 +36,7 @@ public class SessionListHandler : MonoBehaviour
 
     public void Even_OnJoinSession(SessionInfo info)
     {
-
+        NetworkRunnerHandler networkRunnerHandler = FindAnyObjectByType<NetworkRunnerHandler>();
+        networkRunnerHandler.JoinGame(info);
     }
 }

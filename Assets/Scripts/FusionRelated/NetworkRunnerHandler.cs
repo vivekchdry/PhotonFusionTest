@@ -16,6 +16,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkPlayerSpawner Prefab_networkPlayerSpawner;
     [SerializeField]
     private NetworkRunner networkRunner;
+    [SerializeField]
+    private LobbySceneHandler lobbySceneHandler;
+    [SerializeField]
+    private SessionListHandler sessionListHandler;
+    public string playerInGameName;// { get; private set; }
+
+
 
     // private void OnGUI()
     // {
@@ -37,7 +44,32 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log("Awake " + nameof(NetworkRunnerHandler));
 
         //networkRunner = gameObject.AddComponent<NetworkRunner>();
+        lobbySceneHandler = FindAnyObjectByType<LobbySceneHandler>();
+        sessionListHandler = FindAnyObjectByType<SessionListHandler>();
+        if (lobbySceneHandler != null)
+        {
+            StartCoroutine(lobbySceneHandler.StartFakeLoading(true));
+
+            lobbySceneHandler.Button_hostNewGame.onClick.AddListener(() =>
+            {
+                CreateGame("TestSession 1", "GameScene");
+            });
+
+            lobbySceneHandler.Button_enterGameLobby.onClick.AddListener(() =>
+            {
+                lobbySceneHandler.ShowPanel_ListAllSession();
+            });
+
+            if (sessionListHandler != null)
+            {
+                sessionListHandler.goback.onClick.AddListener(() =>
+                {
+                    lobbySceneHandler.ShowPanel_HostOrJoinSession();
+                });
+            }
+        }
     }
+
 
     private void Start()
     {
@@ -83,6 +115,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (result.Ok)
         {
             Debug.Log("OK StartGame " + nameof(NetworkRunnerHandler));
+
         }
         else
         {
@@ -107,19 +140,24 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnJoinLobby()
     {
         Debug.Log("OnJoinLobby " + nameof(NetworkRunnerHandler));
-        //var clientTask = JoinLobby();
+        var clientTask = JoinLobby();
         //var networkPlayerSpawner = Instantiate(Prefab_networkPlayerSpawner);
     }
 
     public async Task JoinLobby()
     {
         Debug.Log("JoinLobby " + nameof(NetworkRunnerHandler));
-        string lobbyId = "CustomLobbyId";
+        string lobbyId = "CustomLobbyId_A";
         var result = await networkRunner.JoinSessionLobby(SessionLobby.Custom, lobbyId);
 
         if (result.Ok)
         {
             Debug.Log($"Successfully Joined Lobby {lobbyId}");
+            if (lobbySceneHandler != null)
+            {
+                StartCoroutine(lobbySceneHandler.StartFakeLoading(false));
+                lobbySceneHandler.Init();
+            }
         }
         else
         {
@@ -130,8 +168,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void CreateGame(string sessionName, string sceneName)
     {
         Debug.Log($"CreateGame {sessionName} {sceneName} {nameof(NetworkRunnerHandler)}");
-        //var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null);
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null);
+        //var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
     }
 
     public void JoinGame(SessionInfo sessionInfo)
@@ -140,16 +178,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Client, sessionInfo.Name, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
     }
 
-    public void HostButtonTemp()
-    {
-        Debug.Log($"HostButtonTemp");
-        CreateGame("TestSession 1", "LobbyScene");
-    }
-    public void JoinButtonTemp()
-    {
-        Debug.Log($"JoinButtonTemp");
-        OnJoinLobby();
-    }
+    // public void HostButtonTemp()
+    // {
+    //     Debug.Log($"HostButtonTemp");
+    //     CreateGame("TestSession 1", "LobbyScene");
+    // }
+    // public void JoinButtonTemp()
+    // {
+    //     Debug.Log($"JoinButtonTemp");
+    //     OnJoinLobby();
+    // }
 
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -199,24 +237,33 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        // Debug.Log($"{nameof(BasicSpawner)} OnSceneLoadDone");
+        Debug.Log($"{nameof(NetworkRunnerHandler)} OnSceneLoadDone");
     }
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
-        // Debug.Log($"{nameof(BasicSpawner)} OnSceneLoadStart");
+        Debug.Log($"{nameof(NetworkRunnerHandler)} OnSceneLoadStart");
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
         Debug.Log($"{nameof(NetworkRunnerHandler)} OnSessionListUpdated");
+        if (sessionListHandler == null)
+        {
+            return;
+        }
 
         if (sessionList.Count > 0)
         {
             foreach (SessionInfo item in sessionList)
             {
                 Debug.Log($"{nameof(NetworkRunnerHandler)} {item.Name}");
+                sessionListHandler.AddToList(item);
             }
+        }
+        else
+        {
+            sessionListHandler.ClearList();
         }
 
     }
@@ -232,7 +279,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     [SerializeField] private NetworkPrefabRef _playerPrefab;
-    private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
+    private Dictionary<PlayerRef, NetworkObject> allSpawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
 
 
@@ -240,25 +287,29 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"{nameof(NetworkRunnerHandler)} OnPlayerJoined");
 
-        // if (runner.IsServer)
-        // {
-        //     Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 2, 0);
-        //     NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
-        //     networkPlayerObject.transform.name = networkPlayerObject.Name;
-        //     _spawnedCharacters.Add(player, networkPlayerObject);
-        // }
+        if (runner.IsServer)
+        {
+            Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 2, 0);
+            NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
+            allSpawnedCharacters.Add(player, networkPlayerObject);
+            networkPlayerObject.transform.name = networkPlayerObject.Name;
+            if (networkPlayerObject.TryGetBehaviour<Player>(out Player playerBehaviour))
+            {
+                playerBehaviour.playerInGameName = playerInGameName;
+            }
+        }
 
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"{nameof(NetworkRunnerHandler)} OnPlayerLeft");
-        // Find and remove the players avatar
-        // if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
-        // {
-        //     runner.Despawn(networkObject);
-        //     _spawnedCharacters.Remove(player);
-        // }
+        //Find and remove the players avatar
+        if (allSpawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
+        {
+            runner.Despawn(networkObject);
+            allSpawnedCharacters.Remove(player);
+        }
     }
 
 }

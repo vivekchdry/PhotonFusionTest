@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
@@ -9,40 +10,123 @@ public class Player : NetworkBehaviour, IAfterSpawned
 {
     public NetworkCharacterControllerPrototype networkCharacterControllerPrototype;
     public NetworkObject networkObject;
-    public Transform myWorldText;
+    public Transform myWorldCanvas;
     public TextLookAtCameraLocally textLookAtCameraLocally;
     public InputHandler inputHandler;
+
+    [SerializeField]
+    private TextMeshProUGUI playerChat;
+    [SerializeField]
+    private TextMeshProUGUI playerName;
+    [Networked(OnChanged = nameof(OnMessageToShowChanged))] public NetworkString<_128> messageToShow { get; set; }
+    [Networked(OnChanged = nameof(OnSettingPlayerInGameName))] public NetworkString<_64> playerInGameName { get; set; }
+    //[Networked] public NetworkString<_64> playerInGameName { get; set; }
+    private IEnumerator coroutineTimed;
+
 
     public void AfterSpawned()
     {
         Debug.Log("AfterSpawned PlayerCode");
         InitialSetup();
-        if (networkObject.HasInputAuthority)
-        {
-            textLookAtCameraLocally.myLocalCamera = Camera.main.transform;
-            textLookAtCameraLocally.textLookAtCamera = true;
-        }
-        _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        RPC_SendMessage($"Player_{networkObject.Id}");
+        // if (networkObject.HasInputAuthority)
+        // {
+        //     textLookAtCameraLocally.myLocalCamera = Camera.main.transform;
+        //     textLookAtCameraLocally.textLookAtCamera = true;
+        // }
+        // _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        // RPC_SendMessage($"Player_{networkObject.Id}");
     }
 
-    private void InitialSetup()
+    public void InitialSetup()
     {
-        if (networkObject.HasInputAuthority)
+        //if (networkObject.HasInputAuthority)
+        //{
+        Debug.Log("InitialSetup PlayerCode");
+        coroutineTimed = null;
+        if (HudManager.instance != null)
         {
-            if (HudManager.instance != null)
+            HudManager.instance.cinemachineFreeLook.m_Follow = networkObject.transform.GetChild(0).transform;
+            HudManager.instance.cinemachineFreeLook.m_LookAt = networkObject.transform.GetChild(0).transform;
+        }
+
+        myWorldCanvas = networkObject.transform.GetChild(1).transform;
+        inputHandler.Init();
+
+        textLookAtCameraLocally.myLocalCamera = Camera.main.transform;
+        textLookAtCameraLocally.textLookAtCamera = true;
+        if (playerChat == null)
+        {
+            playerChat = myWorldCanvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        }
+        if (playerName == null)
+        {
+            playerName = myWorldCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        }
+        //RPC_SendMessage($"Player_{networkObject.Id}");
+        //RPC_SendMessage($"{playerInGameName}");
+        //}
+    }
+
+    // private void Update()
+    // {
+    //     if (networkObject.HasInputAuthority && HudManager.instance != null)
+    //     {
+    //         HudManager.instance.MoveCameraUsingTouchPanel();
+    //     }
+    //     if (!networkObject.HasInputAuthority)
+    //     {
+    //         Vector3 targetPosition = Camera.main.transform.position;
+    //         targetPosition.y = myWorldText.transform.position.y;
+    //         myWorldText.transform.LookAt(targetPosition);
+    //         myWorldText.transform.Rotate(0, 180, 0);
+    //     }
+    // }
+
+    public override void FixedUpdateNetwork()
+    {
+
+        if (GetInput(out NetworkInputData input))
+        {
+
+
+            input.direction.Normalize();
+            networkCharacterControllerPrototype.Move(5 * input.direction * Runner.DeltaTime);
+            // jump (check for pressed)
+
+
+            if (input.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
             {
-                HudManager.instance.cinemachineFreeLook.m_Follow = networkObject.transform.GetChild(0).transform;
-                HudManager.instance.cinemachineFreeLook.m_LookAt = networkObject.transform.GetChild(0).transform;
+                networkCharacterControllerPrototype.Jump(false);
+                HudManager.instance.jumpButtonPressed = false;
+                if (networkObject.HasInputAuthority && HudManager.instance != null)
+                {
+                    input.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);
+                }
+            }
+            if (input.OnScreenButtons.IsSet(HudButtons.TALK_BUTTON))
+            {
+                //RPC_SendMessage($"Player_{networkObject.Id} Talking.");
+                RPC_SendMessage($"{playerInGameName} Talking.");
+                HudManager.instance.talkButtonPressed = false;
+                if (networkObject.HasInputAuthority && HudManager.instance != null)
+                {
+                    input.OnScreenButtons.Set(HudButtons.TALK_BUTTON, HudManager.instance.talkButtonPressed);
+                }
             }
 
-            myWorldText = networkObject.transform.GetChild(1).transform;
-            inputHandler.Init();
-        }
-    }
+            // if (input.jumpButtonPressed)
+            // {
+            //     input.jumpButtonPressed = false;
+            //     if (networkObject.HasInputAuthority && HudManager.instance != null)
+            //     {
+            //         HudManager.instance.jumpButtonPressed = false;
+            //     }
+            //     networkCharacterControllerPrototype.Jump(false);
+            // }
 
-    private void Update()
-    {
+
+        }
+
         if (networkObject.HasInputAuthority && HudManager.instance != null)
         {
             HudManager.instance.MoveCameraUsingTouchPanel();
@@ -50,92 +134,16 @@ public class Player : NetworkBehaviour, IAfterSpawned
         if (!networkObject.HasInputAuthority)
         {
             Vector3 targetPosition = Camera.main.transform.position;
-            targetPosition.y = myWorldText.transform.position.y;
-            myWorldText.transform.LookAt(targetPosition);
-            myWorldText.transform.Rotate(0, 180, 0);
+            targetPosition.y = myWorldCanvas.transform.position.y;
+            myWorldCanvas.transform.LookAt(targetPosition);
+            myWorldCanvas.transform.Rotate(0, 180, 0);
         }
     }
 
-    public override void FixedUpdateNetwork()
-    {
-
-        if (GetInput(out NetworkInputData data))
-        {
-            data.direction.Normalize();
-            networkCharacterControllerPrototype.Move(5 * data.direction * Runner.DeltaTime);
-            // jump (check for pressed)
-            if (networkObject.HasInputAuthority && HudManager.instance != null)
-            {
-                if (data.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
-                {
-                    HudManager.instance.jumpButtonPressed = false;
-                    networkCharacterControllerPrototype.Jump(false);
-                }
-                if (data.OnScreenButtons.IsSet(HudButtons.TALK_BUTTON))
-                {
-                    HudManager.instance.talkButtonPressed = false;
-                    RPC_SendMessage($"Player_{networkObject.Id} Talking.");
-                }
-            }
-
-            // if (data.jumpButtonPressed)
-            // {
-            //     data.jumpButtonPressed = false;
-            //     if (networkObject.HasInputAuthority && HudManager.instance != null)
-            //     {
-            //         HudManager.instance.jumpButtonPressed = false;
-            //     }
-            //     networkCharacterControllerPrototype.Jump(false);
-            // }
-            // if (data.talkButtonPressed)
-            // {
-            //     if (networkObject.HasInputAuthority && HudManager.instance != null)
-            //     {
-            //         //RPC_SendMessage(networkObject.Name);
-            //         RPC_SendMessage($"Player_{networkObject.Id} Talking.");
-            //         //RPC_SendMessage($"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-            //         HudManager.instance.talkButtonPressed = false;
-            //     }
-            // }
-        }
-
-
-        // if (networkObject.HasInputAuthority)
-        // {
-        //     // if (HudManager.instance != null)
-        //     // {
-        //     //     if (HudManager.instance.cinemachineFreeLook.m_Follow == null)
-        //     //     {
-        //     //         HudManager.instance.cinemachineFreeLook.m_Follow = transform.GetChild(0).transform;
-        //     //     }
-        //     //     if (HudManager.instance.cinemachineFreeLook.m_LookAt == null)
-        //     //     {
-        //     //         HudManager.instance.cinemachineFreeLook.m_LookAt = transform.GetChild(0).transform;
-        //     //     }
-        //     // }
-
-        //     if (HudManager.instance != null)
-        //     {
-        //         HudManager.instance.MoveCameraUsingTouchPanel();
-        //         //HudManager.instance.cinemachineFreeLook.m_XAxis.Value += HudManager.instance.touchDetect.TouchDistance.x * 200 * HudManager.instance.sensitivityX * Time.deltaTime;
-        //         //HudManager.instance.cinemachineFreeLook.m_YAxis.Value += HudManager.instance.touchDetect.TouchDistance.y * HudManager.instance.sensitivityY * Time.deltaTime;
-        //     }
-        // }
-        // else
-        // {
-        //     Vector3 targetPosition = Camera.main.transform.position;
-        //     targetPosition.y = myWorldText.transform.position.y;
-        //     myWorldText.transform.LookAt(targetPosition);
-        //     myWorldText.transform.Rotate(0, 180, 0);
-        // }
-
-    }
 
 
 
 
-    private TextMeshProUGUI _messagesText;
-    [Networked(OnChanged = nameof(OnMessageToShowChanged))] public NetworkString<_128> messageToShow { get; set; }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SendMessage(string message, RpcInfo info = default)
@@ -153,10 +161,36 @@ public class Player : NetworkBehaviour, IAfterSpawned
 
     private void OnMessageToShowChanged()
     {
-        if (_messagesText == null)
+        if (playerChat == null)
         {
-            _messagesText = myWorldText.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+            playerChat = myWorldCanvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         }
-        _messagesText.text = messageToShow.ToString();
+        playerChat.text = messageToShow.ToString();
+        if (coroutineTimed == null)
+        {
+            coroutineTimed = ClearChatMessageTempSolution();
+            StartCoroutine(coroutineTimed);
+        }
+    }
+
+    public static void OnSettingPlayerInGameName(Changed<Player> changed)
+    {
+        changed.Behaviour.OnSettingPlayerInGameName();
+        //playerNameInGame = changed.Behaviour.playerNameInGame;
+    }
+    private void OnSettingPlayerInGameName()
+    {
+        if (playerName == null)
+        {
+            playerName = myWorldCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        }
+        playerName.text = playerInGameName.ToString();
+    }
+
+    public IEnumerator ClearChatMessageTempSolution()
+    {
+        yield return new WaitForSeconds(2);
+        RPC_SendMessage(string.Empty);
+        coroutineTimed = null;
     }
 }
