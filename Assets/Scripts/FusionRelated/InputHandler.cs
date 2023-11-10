@@ -35,8 +35,6 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-#if UNITY_EDITOR
-
         if (forceJoystickInput)
         {
             GetInputDataFromJoystick();
@@ -45,9 +43,7 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             GetInputDataFromKeyboard();
         }
-#else
-            GetInputDataFromJoystick();
-#endif
+
 
     }
 
@@ -116,76 +112,76 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"{nameof(InputHandler)} OnPlayerJoined");
+        // Debug.Log($"{nameof(InputHandler)} OnPlayerJoined");
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"{nameof(InputHandler)} OnPlayerLeft");
+        // Debug.Log($"{nameof(InputHandler)} OnPlayerLeft");
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
     {
-        Debug.Log($"{nameof(InputHandler)} OnInputMissing");
+        // Debug.Log($"{nameof(InputHandler)} OnInputMissing");
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        Debug.Log($"{nameof(InputHandler)} OnShutdown");
+        // Debug.Log($"{nameof(InputHandler)} OnShutdown");
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        Debug.Log($"{nameof(InputHandler)} OnConnectedToServer");
+        // Debug.Log($"{nameof(InputHandler)} OnConnectedToServer");
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner)
     {
-        Debug.Log($"{nameof(InputHandler)} OnDisconnectedFromServer");
+        // Debug.Log($"{nameof(InputHandler)} OnDisconnectedFromServer");
     }
 
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
     {
-        Debug.Log($"{nameof(InputHandler)} OnConnectRequest");
+        // Debug.Log($"{nameof(InputHandler)} OnConnectRequest");
     }
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
-        Debug.Log($"{nameof(InputHandler)} OnConnectFailed");
+        // Debug.Log($"{nameof(InputHandler)} OnConnectFailed");
     }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
     {
-        Debug.Log($"{nameof(InputHandler)} OnUserSimulationMessage");
+        // Debug.Log($"{nameof(InputHandler)} OnUserSimulationMessage");
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
-        Debug.Log($"{nameof(InputHandler)} OnSessionListUpdated");
+        // Debug.Log($"{nameof(InputHandler)} OnSessionListUpdated");
     }
 
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
     {
-        Debug.Log($"{nameof(InputHandler)} OnCustomAuthenticationResponse");
+        // Debug.Log($"{nameof(InputHandler)} OnCustomAuthenticationResponse");
     }
 
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
     {
-        Debug.Log($"{nameof(InputHandler)} OnHostMigration");
+        // Debug.Log($"{nameof(InputHandler)} OnHostMigration");
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
     {
-        Debug.Log($"{nameof(InputHandler)} OnReliableDataReceived");
+        // Debug.Log($"{nameof(InputHandler)} OnReliableDataReceived");
     }
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        Debug.Log($"{nameof(InputHandler)} OnSceneLoadDone");
+        // Debug.Log($"{nameof(InputHandler)} OnSceneLoadDone");
     }
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
-        Debug.Log($"{nameof(InputHandler)} OnSceneLoadStart");
+        // Debug.Log($"{nameof(InputHandler)} OnSceneLoadStart");
     }
 }

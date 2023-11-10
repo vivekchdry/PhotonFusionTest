@@ -4,38 +4,49 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using EasyUI.Toast;
+using System;
 
 public class LobbySceneHandler : MonoBehaviour
 {
+    private NetworkRunnerHandler networkRunnerHandler;
 
     public TextMeshProUGUI Text_gameTitle;
     public TextMeshProUGUI Text_playerDisplayName;
 
     public TMP_InputField Input_playerName;
     public TMP_InputField Input_sessionName;
+    public Button Button_createNewSession;
     public Button Button_hostNewGame;
-    public Button Button_enterGameLobby;
+    public Button Button_enterSessionBrowser;
+    public Slider Slider_playerCount;
     public GameObject Panel_hostOrJoinSession;
     public GameObject Panel_lisAllSessions;
 
-
     public GameObject LoadingAnimationObject;
-    private NetworkRunnerHandler networkRunnerHandler;
+    public GameObject CreateSessionObject;
 
-
+    public string customSessionName { get; private set; }
+    public int customSessionPlayerCount { get; private set; }
 
     private void OnEnable()
     {
         // Subscribe to the EndEdit event.
         Input_playerName.onEndEdit.AddListener(PlayerName_OnEndEdit);
-        Button_enterGameLobby.onClick.AddListener(ShowPanel_ListAllSession);
+        Button_enterSessionBrowser.onClick.AddListener(ShowPanel_ListAllSession);
+        Input_sessionName.onEndEdit.AddListener(CustomSessionName_OnEndEdit);
+        Slider_playerCount.onValueChanged.AddListener(Slider_playerCountValueChanged);
 
     }
+
+
+
     private void OnDisable()
     {
         // Un-Subscribe to the EndEdit event.
         Input_playerName.onEndEdit.RemoveListener(PlayerName_OnEndEdit);
-        Button_enterGameLobby.onClick.RemoveListener(ShowPanel_ListAllSession);
+        Button_enterSessionBrowser.onClick.RemoveListener(ShowPanel_ListAllSession);
+        Input_sessionName.onEndEdit.RemoveListener(CustomSessionName_OnEndEdit);
+        Slider_playerCount.onValueChanged.RemoveListener(Slider_playerCountValueChanged);
     }
 
     private void PlayerName_OnEndEdit(string inputText)
@@ -47,13 +58,13 @@ public class LobbySceneHandler : MonoBehaviour
         if (!CheckPlayerName())
         {
             Toast.Show("Please enter <b><color=yellow>PLAYER NAME</color></b>", 1.5f, ToastPosition.BottomCenter);
-            Button_hostNewGame.interactable = false;
-            Button_enterGameLobby.interactable = false;
+            Button_createNewSession.interactable = false;
+            Button_enterSessionBrowser.interactable = false;
         }
         else
         {
-            Button_hostNewGame.interactable = true;
-            Button_enterGameLobby.interactable = true;
+            Button_createNewSession.interactable = true;
+            Button_enterSessionBrowser.interactable = true;
         }
 
         //SwitchGameHeader();
@@ -62,6 +73,30 @@ public class LobbySceneHandler : MonoBehaviour
     bool CheckPlayerName()
     {
         return networkRunnerHandler.playerInGameName != "" && networkRunnerHandler.playerInGameName != null && networkRunnerHandler.playerInGameName != string.Empty;
+    }
+
+    bool CheckSessionName()
+    {
+        return customSessionName != "" && customSessionName != null && customSessionName != string.Empty;
+    }
+
+    private void CustomSessionName_OnEndEdit(string inputText)
+    {
+        customSessionName = inputText;
+        if (CheckSessionName())
+        {
+            Button_hostNewGame.interactable = true;
+        }
+        else
+        {
+            Toast.Show("Please enter <b><color=yellow>SESSION NAME</color></b>", 1.5f, ToastPosition.BottomCenter);
+            Button_hostNewGame.interactable = false;
+        }
+    }
+
+    private void Slider_playerCountValueChanged(float value)
+    {
+        customSessionPlayerCount = (int)value;
     }
 
     public void ShowPanel_HostOrJoinSession()
@@ -95,11 +130,18 @@ public class LobbySceneHandler : MonoBehaviour
     {
         Text_gameTitle.gameObject.SetActive(true);
         Text_playerDisplayName.gameObject.SetActive(false);
+        Button_createNewSession.interactable = false;
         Button_hostNewGame.interactable = false;
-        Button_enterGameLobby.interactable = false;
+        Button_enterSessionBrowser.interactable = false;
         Panel_hostOrJoinSession.gameObject.SetActive(true);
         Panel_lisAllSessions.gameObject.SetActive(false);
         Text_playerDisplayName.text = string.Empty;
+        Slider_playerCount.minValue = 2;
+        Slider_playerCount.maxValue = 10;
+        Slider_playerCount.value = Slider_playerCount.minValue;
+        Input_sessionName.text = string.Empty;
+        Input_playerName.text = string.Empty;
+        CreateSessionObject.SetActive(false);
         //playerInGameName = string.Empty;
         networkRunnerHandler = FindAnyObjectByType<NetworkRunnerHandler>();
 
@@ -111,13 +153,16 @@ public class LobbySceneHandler : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         LoadingAnimationObject.SetActive(showAnimation);
-        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase>";
-        // yield return new WaitForSeconds(0.5f);
-        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>.</size>";
-        // yield return new WaitForSeconds(0.5f);
-        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>..</size>";
-        // yield return new WaitForSeconds(0.5f);
-        // Text_showLoading.text = "<b><uppercase>Loading</b></uppercase><size=150%>...</size>";
+    }
+
+    public void ControlCreateSessionPanel(bool show)
+    {
+        Slider_playerCount.minValue = 2;
+        Slider_playerCount.maxValue = 10;
+        Slider_playerCount.value = Slider_playerCount.minValue;
+        Button_hostNewGame.interactable = false;
+        Input_sessionName.text = string.Empty;
+        CreateSessionObject.SetActive(show);
     }
 
 }

@@ -20,24 +20,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private LobbySceneHandler lobbySceneHandler;
     [SerializeField]
     private SessionListHandler sessionListHandler;
-    public string playerInGameName;// { get; private set; }
+
+    private NetworkObject networkPlayerObject;
+
+    public string playerInGameName;
 
 
-
-    // private void OnGUI()
-    // {
-    //     if (networkRunner == null)
-    //     {
-    //         if (GUI.Button(new Rect(20, 20, 240, 80), "Host"))
-    //         {
-    //             StartGame(GameMode.Host);
-    //         }
-    //         if (GUI.Button(new Rect(20, 120, 240, 80), "Join"))
-    //         {
-    //             StartGame(GameMode.Client);
-    //         }
-    //     }
-    // }
 
     private void Awake()
     {
@@ -50,12 +38,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             StartCoroutine(lobbySceneHandler.StartFakeLoading(true));
 
+            lobbySceneHandler.Button_createNewSession.onClick.AddListener(() =>
+            {
+                lobbySceneHandler.ControlCreateSessionPanel(true);
+            });
             lobbySceneHandler.Button_hostNewGame.onClick.AddListener(() =>
             {
-                CreateGame("TestSession 1", "GameScene");
+                CreateGame(lobbySceneHandler.customSessionName, "GameScene", lobbySceneHandler.customSessionPlayerCount);
             });
 
-            lobbySceneHandler.Button_enterGameLobby.onClick.AddListener(() =>
+            lobbySceneHandler.Button_enterSessionBrowser.onClick.AddListener(() =>
             {
                 lobbySceneHandler.ShowPanel_ListAllSession();
             });
@@ -88,13 +80,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (SceneManager.GetActiveScene().name != "GameScene")
         {
             Debug.Log("LobbyScene " + nameof(NetworkRunnerHandler));
-            var clientTask = InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, "TestSession", SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
+            var clientTask = InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, "TestSession", SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null, 10);
 
             //var networkPlayerSpawner = Instantiate(Prefab_networkPlayerSpawner);
         }
     }
 
-    protected virtual async Task InitializeNetworkRunner(NetworkRunner networkRunner, GameMode gameMode, string sessionName, SceneRef scene, NetAddress address, Action<NetworkRunner> initialized)
+    protected virtual async Task InitializeNetworkRunner(NetworkRunner networkRunner, GameMode gameMode, string sessionName, SceneRef scene, NetAddress address, Action<NetworkRunner> initialized, int maxPlayerCount)
     {
         Debug.Log("InitializeNetworkRunner " + nameof(NetworkRunnerHandler));
         var sceneManager = GetSceneManager(networkRunner);
@@ -109,7 +101,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             Address = address,
             Initialized = initialized,
             SceneManager = sceneManager,
-
+            PlayerCount = maxPlayerCount
         });
 
         if (result.Ok)
@@ -147,7 +139,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public async Task JoinLobby()
     {
         Debug.Log("JoinLobby " + nameof(NetworkRunnerHandler));
-        string lobbyId = "CustomLobbyId_A";
+        string lobbyId = "CustomLobbyId_1";
         var result = await networkRunner.JoinSessionLobby(SessionLobby.Custom, lobbyId);
 
         if (result.Ok)
@@ -165,29 +157,21 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    public void CreateGame(string sessionName, string sceneName)
+    public void CreateGame(string sessionName, string sceneName, int maxPlayerCount)
     {
+        PlayerPrefs.SetString("playerInGameName", playerInGameName);
         Debug.Log($"CreateGame {sessionName} {sceneName} {nameof(NetworkRunnerHandler)}");
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneUtility.GetBuildIndexByScenePath($"Scenes/{sceneName}"), NetAddress.Any(), null, maxPlayerCount);
         //var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
     }
 
     public void JoinGame(SessionInfo sessionInfo)
     {
+        PlayerPrefs.SetString("playerInGameName", playerInGameName);
         Debug.Log($"JoinGame {sessionInfo.Name} {nameof(NetworkRunnerHandler)}");
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Client, sessionInfo.Name, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Client, sessionInfo.Name, SceneManager.GetActiveScene().buildIndex, NetAddress.Any(), null, sessionInfo.MaxPlayers);
     }
 
-    // public void HostButtonTemp()
-    // {
-    //     Debug.Log($"HostButtonTemp");
-    //     CreateGame("TestSession 1", "LobbyScene");
-    // }
-    // public void JoinButtonTemp()
-    // {
-    //     Debug.Log($"JoinButtonTemp");
-    //     OnJoinLobby();
-    // }
 
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -281,25 +265,21 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkPrefabRef _playerPrefab;
     private Dictionary<PlayerRef, NetworkObject> allSpawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
+    //public delegate void OnBeforeSpawned(NetworkRunner runner, NetworkObject obj);
 
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
+
         Debug.Log($"{nameof(NetworkRunnerHandler)} OnPlayerJoined");
 
-        if (runner.IsServer)
-        {
-            Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 2, 0);
-            NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
-            allSpawnedCharacters.Add(player, networkPlayerObject);
-            networkPlayerObject.transform.name = networkPlayerObject.Name;
-            if (networkPlayerObject.TryGetBehaviour<Player>(out Player playerBehaviour))
-            {
-                playerBehaviour.playerInGameName = playerInGameName;
-            }
-        }
+        Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 2, 0);
+        networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
+        allSpawnedCharacters.Add(player, networkPlayerObject);
 
     }
+
+
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
@@ -309,7 +289,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             runner.Despawn(networkObject);
             allSpawnedCharacters.Remove(player);
+            networkPlayerObject = null;
         }
     }
+
+
 
 }

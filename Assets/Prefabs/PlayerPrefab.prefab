@@ -383,7 +383,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9c9e25a3a63bfa4c9673381e6d34cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceJoystickInput: 1
+  forceJoystickInput: 0
   fixedJoystick: {fileID: 0}
   setupDone: 0
 --- !u!1 &4955722198755569899
