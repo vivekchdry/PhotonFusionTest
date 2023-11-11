@@ -16,7 +16,7 @@ public class SessionListHandler : MonoBehaviour
     public Transform scrollViewContent;
 
 
-    public void ClearList()
+    public void ClearList(bool showMessage = false)
     {
         foreach (Transform item in scrollViewContent)
         {

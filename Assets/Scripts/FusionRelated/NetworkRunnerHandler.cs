@@ -236,19 +236,25 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             return;
         }
+        sessionListHandler.ClearList();
 
         if (sessionList.Count > 0)
         {
             foreach (SessionInfo item in sessionList)
             {
                 Debug.Log($"{nameof(NetworkRunnerHandler)} {item.Name}");
+                if (item.PlayerCount >= item.MaxPlayers)
+                {
+                    item.IsOpen = false;
+                }
+                else
+                {
+                    item.IsOpen = true;
+                }
                 sessionListHandler.AddToList(item);
             }
         }
-        else
-        {
-            sessionListHandler.ClearList();
-        }
+
 
     }
 

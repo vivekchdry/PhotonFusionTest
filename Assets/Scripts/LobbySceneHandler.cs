@@ -9,6 +9,8 @@ using System;
 public class LobbySceneHandler : MonoBehaviour
 {
     private NetworkRunnerHandler networkRunnerHandler;
+    [SerializeField]
+    private TextMeshProUGUI playerCountSliderDisplay;
 
     public TextMeshProUGUI Text_gameTitle;
     public TextMeshProUGUI Text_playerDisplayName;
@@ -97,6 +99,7 @@ public class LobbySceneHandler : MonoBehaviour
     private void Slider_playerCountValueChanged(float value)
     {
         customSessionPlayerCount = (int)value;
+        playerCountSliderDisplay.text = $"{customSessionPlayerCount}";
     }
 
     public void ShowPanel_HostOrJoinSession()
@@ -139,6 +142,8 @@ public class LobbySceneHandler : MonoBehaviour
         Slider_playerCount.minValue = 2;
         Slider_playerCount.maxValue = 10;
         Slider_playerCount.value = Slider_playerCount.minValue;
+        customSessionPlayerCount = 2;
+        playerCountSliderDisplay.text = $"{customSessionPlayerCount}";
         Input_sessionName.text = string.Empty;
         Input_playerName.text = string.Empty;
         CreateSessionObject.SetActive(false);
@@ -160,6 +165,8 @@ public class LobbySceneHandler : MonoBehaviour
         Slider_playerCount.minValue = 2;
         Slider_playerCount.maxValue = 10;
         Slider_playerCount.value = Slider_playerCount.minValue;
+        customSessionPlayerCount = 2;
+        playerCountSliderDisplay.text = $"{customSessionPlayerCount}";
         Button_hostNewGame.interactable = false;
         Input_sessionName.text = string.Empty;
         CreateSessionObject.SetActive(show);
