@@ -36,7 +36,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         sessionListHandler = FindAnyObjectByType<SessionListHandler>();
         if (lobbySceneHandler != null)
         {
-            StartCoroutine(lobbySceneHandler.StartFakeLoading(true));
+            //StartCoroutine(lobbySceneHandler.StartFakeLoading(true));
+            StartCoroutine(lobbySceneHandler.StartFakeLoading("Connecting", true));
 
             lobbySceneHandler.Button_createNewSession.onClick.AddListener(() =>
             {
@@ -147,13 +148,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             Debug.Log($"Successfully Joined Lobby {lobbyId}");
             if (lobbySceneHandler != null)
             {
-                StartCoroutine(lobbySceneHandler.StartFakeLoading(false));
+                //StartCoroutine(lobbySceneHandler.StartFakeLoading(false));
+                StartCoroutine(lobbySceneHandler.StartFakeLoading("Connected", false));
+                lobbySceneHandler.holderPrimaryParent.SetActive(true);
                 lobbySceneHandler.Init();
             }
         }
         else
         {
             Debug.Log($"Unable to Join Lobby {lobbyId} {result.ShutdownReason}");
+            StartCoroutine(lobbySceneHandler.StartFakeLoading("Something went wrong.", true));
         }
     }
 

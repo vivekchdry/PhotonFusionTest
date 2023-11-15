@@ -810,7 +810,7 @@ PlayerSettings:
   webGLDebugSymbols: 0
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
-  webGLTemplate: APPLICATION:Default
+  webGLTemplate: PROJECT:RPMTemplate
   webGLAnalyzeBuildSize: 0
   webGLUseEmbeddedResources: 0
   webGLCompressionFormat: 1
@@ -826,8 +826,23 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: FUSION_WEAVER
-    Standalone: FUSION_WEAVER
+    Android: FUSION_WEAVER;GLTFAST;READY_PLAYER_ME
+    EmbeddedLinux: GLTFAST;READY_PLAYER_ME
+    GameCoreScarlett: GLTFAST;READY_PLAYER_ME
+    GameCoreXboxOne: GLTFAST;READY_PLAYER_ME
+    LinuxHeadlessSimulation: GLTFAST;READY_PLAYER_ME
+    Nintendo Switch: GLTFAST;READY_PLAYER_ME
+    PS4: GLTFAST;READY_PLAYER_ME
+    PS5: GLTFAST;READY_PLAYER_ME
+    QNX: GLTFAST;READY_PLAYER_ME
+    Stadia: GLTFAST;READY_PLAYER_ME
+    Standalone: FUSION_WEAVER;GLTFAST;READY_PLAYER_ME
+    VisionOS: GLTFAST;READY_PLAYER_ME
+    WebGL: GLTFAST;READY_PLAYER_ME
+    Windows Store Apps: GLTFAST;READY_PLAYER_ME
+    XboxOne: GLTFAST;READY_PLAYER_ME
+    iPhone: GLTFAST;READY_PLAYER_ME
+    tvOS: GLTFAST;READY_PLAYER_ME
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

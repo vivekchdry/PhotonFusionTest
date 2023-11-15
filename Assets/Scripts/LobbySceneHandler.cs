@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using EasyUI.Toast;
 using System;
+using ReadyPlayerMe;
 
 public class LobbySceneHandler : MonoBehaviour
 {
@@ -29,6 +30,8 @@ public class LobbySceneHandler : MonoBehaviour
 
     public string customSessionName { get; private set; }
     public int customSessionPlayerCount { get; private set; }
+    public LoadingManager loadingManager;
+    public GameObject holderPrimaryParent;
 
     private void OnEnable()
     {
@@ -154,11 +157,28 @@ public class LobbySceneHandler : MonoBehaviour
 
     }
 
-    public IEnumerator StartFakeLoading(bool showAnimation)
+    public IEnumerator StartFakeLoading(string message, bool showAnimation)
     {
         yield return new WaitForSeconds(0.1f);
-        LoadingAnimationObject.SetActive(showAnimation);
+        // LoadingAnimationObject.SetActive(showAnimation);
+        if (loadingManager == null)
+        {
+            loadingManager = FindObjectOfType<LoadingManager>();
+        }
+        if (showAnimation)
+        {
+            loadingManager.EnableLoading(message, LoadingManager.LoadingType.Fullscreen, true);
+        }
+        else
+        {
+            loadingManager.DisableLoading();
+        }
     }
+    // public IEnumerator StartFakeLoading(bool showAnimation)
+    // {
+    //     yield return new WaitForSeconds(0.1f);
+    //     LoadingAnimationObject.SetActive(showAnimation);
+    // }
 
     public void ControlCreateSessionPanel(bool show)
     {

@@ -6,11 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/preload.unity
+    guid: bcae9e1555b22f24d85d03d14c6edfec
+  - enabled: 1
     path: Assets/Scenes/LobbyScene.unity
     guid: e3df8513f49a1f64b8e90f27be4db74c
   - enabled: 1
     path: Assets/Scenes/GameScene.unity
     guid: cff279c7dc13f13418d5d1471c606296
+  - enabled: 1
+    path: Assets/Samples/Ready Player Me Core/4.0.0/AvatarCreatorSamples/Scenes/AvatarCreatorSample.unity
+    guid: 86c1a7b565e8e154dbb4522097759eeb
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
       guid: a1d57b603a1c0784484f67b7b891c739, type: 2}
