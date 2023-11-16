@@ -21,6 +21,9 @@ public class Player : NetworkBehaviour, IAfterSpawned
     [Networked(OnChanged = nameof(OnMessageToShowChanged))] public NetworkString<_128> messageToShow { get; set; }
     [Networked(OnChanged = nameof(OnSettingPlayerInGameName))] public NetworkString<_64> playerInGameName { get; set; }
     private IEnumerator coroutineTimed;
+    [SerializeField]
+    private RpmCustomAvatarManager rpmCustomAvatarManager;
+
 
 
     public void AfterSpawned()
@@ -35,6 +38,11 @@ public class Player : NetworkBehaviour, IAfterSpawned
         if (networkObject.HasInputAuthority)
         {
             Debug.Log("InitialSetup PlayerCode");
+            if (rpmCustomAvatarManager == null)
+            {
+                rpmCustomAvatarManager = GetComponent<RpmCustomAvatarManager>();
+            }
+            rpmCustomAvatarManager.Init();
             coroutineTimed = null;
             if (HudManager.instance != null)
             {
@@ -69,14 +77,17 @@ public class Player : NetworkBehaviour, IAfterSpawned
         if (GetInput(out NetworkInputData input))
         {
 
-
             input.direction.Normalize();
-            networkCharacterControllerPrototype.Move(5 * input.direction * Runner.DeltaTime);
-            // jump (check for pressed)
+            networkCharacterControllerPrototype.Move(input.direction * Runner.DeltaTime);
 
+            if (rpmCustomAvatarManager != null)
+            {
+                rpmCustomAvatarManager.ControlMoveAnimation(input.direction.magnitude * networkCharacterControllerPrototype.maxSpeed);
+            }
 
             if (input.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
             {
+
                 networkCharacterControllerPrototype.Jump(false);
                 HudManager.instance.jumpButtonPressed = false;
                 if (networkObject.HasInputAuthority && HudManager.instance != null)
@@ -163,4 +174,5 @@ public class Player : NetworkBehaviour, IAfterSpawned
         RPC_SendMessage(string.Empty);
         coroutineTimed = null;
     }
+
 }

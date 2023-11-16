@@ -27,7 +27,7 @@ public class FetchAvatarSavedInformation : MonoBehaviour
         StartCoroutine(CustomStart());
     }
 
-    private IEnumerator CustomStart()
+    public IEnumerator CustomStart()
     {
         loadingManager = FindObjectOfType<LoadingManager>();
         yield return new WaitForSeconds(1f);

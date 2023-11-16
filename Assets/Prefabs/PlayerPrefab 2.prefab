@@ -230,11 +230,11 @@ GameObject:
   - component: {fileID: 3209144557503466702}
   - component: {fileID: 8307740066516526284}
   - component: {fileID: -8604987130966893400}
+  - component: {fileID: 2003052900211343499}
   - component: {fileID: 3955007295236556592}
   - component: {fileID: 1954332914986088858}
-  - component: {fileID: -8080789983483314453}
   m_Layer: 0
-  m_Name: PlayerPrefab
+  m_Name: PlayerPrefab 2
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -302,11 +302,11 @@ MonoBehaviour:
   AoiPositionSource: {fileID: 0}
   Flags: 2305
   NetworkGuid:
-    RawGuidValue: ce2a32d5d468a904e9fa06aebf54b111
+    RawGuidValue: 01400930539a7e3478e77111b59e2608
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: -8604987130966893400}
-  - {fileID: -8080789983483314453}
+  - {fileID: 2003052900211343499}
   SimulationBehaviours: []
 --- !u!114 &-8604987130966893400
 MonoBehaviour:
@@ -321,7 +321,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
-  networkCharacterControllerPrototype: {fileID: -8080789983483314453}
+  networkCharacterControllerPrototype: {fileID: 2003052900211343499}
   networkObject: {fileID: 8307740066516526284}
   myWorldCanvas: {fileID: 2909103175755216863}
   textLookAtCameraLocally: {fileID: 762825297573641808}
@@ -336,41 +336,7 @@ MonoBehaviour:
     _length: 0
     _data:
       Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  rpmCustomAvatarManager: {fileID: 1954332914986088858}
---- !u!114 &3955007295236556592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4800358275775028864}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9c9e25a3a63bfa4c9673381e6d34cc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  forceJoystickInput: 0
-  fixedJoystick: {fileID: 0}
-  setupDone: 0
---- !u!114 &1954332914986088858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4800358275775028864}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e369c90eaa7ffbc4a8a958fe098c38f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  avatarId: 
-  avatarUrl: 
-  animatorController: {fileID: 9100000, guid: bea63b6083163f247878bb28fe8da8be, type: 2}
-  animator: {fileID: 0}
-  networkCharacterControllerPrototype: {fileID: -8080789983483314453}
-  avatarReady: 0
---- !u!114 &-8080789983483314453
+--- !u!114 &2003052900211343499
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -406,6 +372,38 @@ MonoBehaviour:
   rotationSpeed: 5
   _IsGrounded: 0
   _Velocity: {x: 0, y: 0, z: 0}
+--- !u!114 &3955007295236556592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4800358275775028864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9c9e25a3a63bfa4c9673381e6d34cc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forceJoystickInput: 0
+  fixedJoystick: {fileID: 0}
+  setupDone: 0
+--- !u!114 &1954332914986088858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4800358275775028864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e369c90eaa7ffbc4a8a958fe098c38f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  avatarId: 
+  avatarUrl: 
+  animatorController: {fileID: 9100000, guid: bea63b6083163f247878bb28fe8da8be, type: 2}
+  animator: {fileID: 0}
+  avatarReady: 0
 --- !u!1 &4955722198755569899
 GameObject:
   m_ObjectHideFlags: 0

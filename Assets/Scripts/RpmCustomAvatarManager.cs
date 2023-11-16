@@ -28,20 +28,28 @@ public class RpmCustomAvatarManager : MonoBehaviour
     [Tooltip("Animator to use on loaded avatar")]
     private RuntimeAnimatorController animatorController;
     [SerializeField]
-    [Tooltip("If true it will try to load avatar from avatarUrl on start")]
-    private bool loadOnStart = true;
+    // [Tooltip("If true it will try to load avatar from avatarUrl on start")]
+    // private bool loadOnStart = true;
     private Animator animator;
 
+    [SerializeField]
     private NetworkCharacterControllerPrototype networkCharacterControllerPrototype;
 
     public event Action OnLoadComplete;
     public bool avatarReady = false;
 
-    private IEnumerator Start()
+    public void Init()
     {
+
+        //StartCoroutine(FetchAvatarSavedInformation.instance.CustomStart());
+        FetchAvatarSavedInformation.instance.CheckAvatarExists();
+
         avatarReady = false;
-        networkCharacterControllerPrototype = GetComponent<NetworkCharacterControllerPrototype>();
-        yield return new WaitForSeconds(10f);
+        if (networkCharacterControllerPrototype == null)
+        {
+            networkCharacterControllerPrototype = GetComponent<NetworkCharacterControllerPrototype>();
+        }
+
         avatarObjectLoader = new AvatarObjectLoader();
         avatarObjectLoader.OnCompleted += OnLoadCompleted;
         avatarObjectLoader.OnFailed += OnLoadFailed;
@@ -73,18 +81,14 @@ public class RpmCustomAvatarManager : MonoBehaviour
         }
 
         avatar = targetAvatar;
-        // Re-parent and reset transforms
+
         avatar.transform.parent = transform;
         avatar.transform.localScale = avatarScaleOffset;
         avatar.transform.localPosition = avatarPositionOffset;
         avatar.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
-        // var controller = GetComponent<ThirdPersonController>();
-        // if (controller != null)
-        // {
-        //     controller.Setup(avatar, animatorController);
-        // }
         animator = avatar.GetComponent<Animator>();
+        animator.runtimeAnimatorController = animatorController;
 
         animator.applyRootMotion = false;
 
@@ -127,6 +131,14 @@ public class RpmCustomAvatarManager : MonoBehaviour
         {
             return;
         }
-        UpdateAnimator();
+        // UpdateAnimator();
+    }
+    public void ControlMoveAnimation(float value)
+    {
+        if (animator != null)
+        {
+            Debug.Log(value);
+            animator.SetFloat(MoveSpeedHash, value);
+        }
     }
 }
