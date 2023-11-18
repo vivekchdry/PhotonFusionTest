@@ -29,13 +29,19 @@ public class FetchAvatarSavedInformation : MonoBehaviour
 
     public IEnumerator CustomStart()
     {
-        loadingManager = FindObjectOfType<LoadingManager>();
-        yield return new WaitForSeconds(1f);
+        if (loadingManager == null)
+        {
+            loadingManager = FindObjectOfType<LoadingManager>();
+            yield return new WaitForSeconds(1f);
+        }
         loadingManager.EnableLoading("Checking existing Avatar", LoadingManager.LoadingType.Fullscreen, true);
         if (CheckAvatarExists())
         {
-            loadingManager.EnableLoading("Loading Lobby", LoadingManager.LoadingType.Fullscreen, true);
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(1f);
+            loadingManager.EnableLoading("Existing avatar found.", LoadingManager.LoadingType.Fullscreen, true);
+            yield return new WaitForSeconds(1f);
+            loadingManager.EnableLoading("Loading into lobby.", LoadingManager.LoadingType.Fullscreen, true);
+            yield return new WaitForSeconds(1f);
             loadingManager.DisableLoading();
             yield return new WaitForSeconds(0.5f);
             SceneManager.LoadScene("LobbyScene");
@@ -43,8 +49,11 @@ public class FetchAvatarSavedInformation : MonoBehaviour
         }
         else
         {
-            loadingManager.EnableLoading("Loading Avatar Creator", LoadingManager.LoadingType.Fullscreen, true);
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(1f);
+            loadingManager.EnableLoading("No existing avatar found.", LoadingManager.LoadingType.Fullscreen, true);
+            yield return new WaitForSeconds(1f);
+            loadingManager.EnableLoading("Loading avatar creator", LoadingManager.LoadingType.Fullscreen, true);
+            yield return new WaitForSeconds(1f);
             loadingManager.DisableLoading();
             yield return new WaitForSeconds(0.5f);
             SceneManager.LoadScene("AvatarCreatorSample");

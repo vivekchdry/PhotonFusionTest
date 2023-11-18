@@ -31,12 +31,14 @@ public class RpmCustomAvatarManager : MonoBehaviour
     // [Tooltip("If true it will try to load avatar from avatarUrl on start")]
     // private bool loadOnStart = true;
     private Animator animator;
+    public bool jumpTrigger;
 
     [SerializeField]
     private NetworkCharacterControllerPrototype networkCharacterControllerPrototype;
 
     public event Action OnLoadComplete;
     public bool avatarReady = false;
+    public float playerCurrentMagnitude;
 
     public void Init()
     {
@@ -102,10 +104,32 @@ public class RpmCustomAvatarManager : MonoBehaviour
         avatarObjectLoader.LoadAvatar(avatarUrl);
     }
 
+    private void Update()
+    {
+        if (!avatarReady)
+        {
+            return;
+        }
+        if (animator == null)
+        {
+            return;
+        }
+        UpdateAnimator();
+    }
+
+    public void ControlMoveAnimation(float value)
+    {
+        if (animator != null)
+        {
+            Debug.Log(value);
+            animator.SetFloat(MoveSpeedHash, value);
+        }
+    }
+
     public void UpdateAnimator()
     {
         var isGrounded = networkCharacterControllerPrototype.IsGrounded;
-        animator.SetFloat(MoveSpeedHash, networkCharacterControllerPrototype.maxSpeed);
+        animator.SetFloat(MoveSpeedHash, playerCurrentMagnitude * networkCharacterControllerPrototype.maxSpeed);
         animator.SetBool(IsGroundedHash, isGrounded);
         if (isGrounded)
         {
@@ -124,21 +148,23 @@ public class RpmCustomAvatarManager : MonoBehaviour
             }
         }
     }
+    public void OnJump()
+    {
+        if (TryJump() && animator != null)
+        {
+            animator.SetTrigger(JumpHash);
+        }
+    }
 
-    private void Update()
+    public bool TryJump()
     {
-        if (!avatarReady)
+        jumpTrigger = false;
+        if (networkCharacterControllerPrototype.IsGrounded)
         {
-            return;
+            jumpTrigger = true;
         }
-        // UpdateAnimator();
+        return jumpTrigger;
     }
-    public void ControlMoveAnimation(float value)
-    {
-        if (animator != null)
-        {
-            Debug.Log(value);
-            animator.SetFloat(MoveSpeedHash, value);
-        }
-    }
+
+
 }

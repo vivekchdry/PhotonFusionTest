@@ -368,6 +368,7 @@ MonoBehaviour:
   avatarUrl: 
   animatorController: {fileID: 9100000, guid: bea63b6083163f247878bb28fe8da8be, type: 2}
   animator: {fileID: 0}
+  jumpTrigger: 0
   networkCharacterControllerPrototype: {fileID: -8080789983483314453}
   avatarReady: 0
 --- !u!114 &-8080789983483314453
@@ -399,7 +400,7 @@ MonoBehaviour:
   UseLegacySharedModeInterpolation: 0
   TargetInterpolationDelay: 0.03
   gravity: -9.81
-  jumpImpulse: 5
+  jumpImpulse: 7
   acceleration: 8
   braking: 10
   maxSpeed: 4

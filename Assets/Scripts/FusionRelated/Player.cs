@@ -82,18 +82,22 @@ public class Player : NetworkBehaviour, IAfterSpawned
 
             if (rpmCustomAvatarManager != null)
             {
-                rpmCustomAvatarManager.ControlMoveAnimation(input.direction.magnitude * networkCharacterControllerPrototype.maxSpeed);
+                //rpmCustomAvatarManager.ControlMoveAnimation(input.direction.magnitude * networkCharacterControllerPrototype.maxSpeed);
+                rpmCustomAvatarManager.playerCurrentMagnitude = input.direction.magnitude;
             }
 
             if (input.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
             {
 
                 networkCharacterControllerPrototype.Jump(false);
+                rpmCustomAvatarManager.OnJump();
                 HudManager.instance.jumpButtonPressed = false;
                 if (networkObject.HasInputAuthority && HudManager.instance != null)
                 {
                     input.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);
+                    rpmCustomAvatarManager.TryJump();
                 }
+
             }
             if (input.OnScreenButtons.IsSet(HudButtons.TALK_BUTTON))
             {
