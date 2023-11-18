@@ -93,10 +93,11 @@ namespace ReadyPlayerMe
 
         private void OnAvatarSelected(string avatarId)
         {
+            Debug.Log("OnAvatarSelected " + avatarId);
             AvatarCreatorData.AvatarProperties.Id = avatarId;
             AvatarCreatorData.AvatarProperties.Base64Image = string.Empty;
             AvatarCreatorData.IsExistingAvatar = false;
-            
+
             StateMachine.SetState(StateType.Editor);
         }
     }
