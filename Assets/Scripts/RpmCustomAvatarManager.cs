@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
 using ReadyPlayerMe.Core;
 using UnityEngine;
 
@@ -39,30 +40,44 @@ public class RpmCustomAvatarManager : MonoBehaviour
     public event Action OnLoadComplete;
     public bool avatarReady = false;
     public float playerCurrentMagnitude;
+    public NetworkObject networkObject;
+    //public Transform mainParent;
+
+    private void OnEnable()
+    {
+        networkObject = GetComponent<NetworkObject>();
+    }
 
     public void Init()
     {
-
-        //StartCoroutine(FetchAvatarSavedInformation.instance.CustomStart());
-        FetchAvatarSavedInformation.instance.CheckAvatarExists();
-
-        avatarReady = false;
-        if (networkCharacterControllerPrototype == null)
+        if (networkObject.HasInputAuthority)
         {
-            networkCharacterControllerPrototype = GetComponent<NetworkCharacterControllerPrototype>();
+            Debug.Log("RpmCustomAvatarManager Init");
+            //StartCoroutine(FetchAvatarSavedInformation.instance.CustomStart());
+            FetchAvatarSavedInformation.instance.CheckAvatarExists();
+
+            avatarReady = false;
+            if (networkCharacterControllerPrototype == null)
+            {
+                networkCharacterControllerPrototype = GetComponent<NetworkCharacterControllerPrototype>();
+            }
+
+            avatarObjectLoader = new AvatarObjectLoader();
+            avatarObjectLoader.OnCompleted += OnLoadCompleted;
+            avatarObjectLoader.OnFailed += OnLoadFailed;
+            avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
+            avatarUrl = $"https://models.readyplayer.me/{avatarId}.glb";
+
+            LoadAvatar(avatarUrl);
+
+
+            // if (previewAvatar != null)
+            // {
+            //     SetupAvatar(previewAvatar);
+            // }
+
+
         }
-
-        avatarObjectLoader = new AvatarObjectLoader();
-        avatarObjectLoader.OnCompleted += OnLoadCompleted;
-        avatarObjectLoader.OnFailed += OnLoadFailed;
-
-        avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
-        avatarUrl = $"https://models.readyplayer.me/{avatarId}.glb";
-
-        // if (loadOnStart)
-        // {
-        // }
-        LoadAvatar(avatarUrl);
     }
     private void OnLoadFailed(object sender, FailureEventArgs args)
     {
@@ -81,6 +96,7 @@ public class RpmCustomAvatarManager : MonoBehaviour
         {
             Destroy(avatar);
         }
+
 
         avatar = targetAvatar;
 

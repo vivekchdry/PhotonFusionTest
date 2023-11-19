@@ -256,12 +256,9 @@ namespace ReadyPlayerMe
             LoadingManager.EnableLoading("Saving avatar...", LoadingManager.LoadingType.Popup);
             var avatarId = await avatarManager.Save();
             AvatarCreatorData.AvatarProperties.Id = avatarId;
-            PlayerPrefs.SetString("AvatarProperties_Id", AvatarCreatorData.AvatarProperties.Id);
-            PlayerPrefs.SetString("AvatarProperties_Partner", AvatarCreatorData.AvatarProperties.Partner);
-            PlayerPrefs.SetInt("AvatarProperties_Gender", (int)AvatarCreatorData.AvatarProperties.Gender);
-            PlayerPrefs.SetInt("AvatarProperties_BodyType", (int)AvatarCreatorData.AvatarProperties.BodyType);
-            PlayerPrefs.SetString("AvatarProperties_Base64Image", AvatarCreatorData.AvatarProperties.Base64Image);
-            PlayerPrefs.SetString("AvatarCreatorData_IsExistingAvatar", AvatarCreatorData.IsExistingAvatar.ToString());
+
+            SaveAvatarInformationLocally(AvatarCreatorData);
+
             Debug.Log("SAVE 1");
 
 
@@ -326,6 +323,16 @@ namespace ReadyPlayerMe
 
             avatarManager.OnError -= OnErrorCallback;
             avatarManager?.Dispose();
+        }
+
+        public static void SaveAvatarInformationLocally(AvatarCreatorData data)
+        {
+            PlayerPrefs.SetString("AvatarProperties_Id", data.AvatarProperties.Id);
+            PlayerPrefs.SetString("AvatarProperties_Partner", data.AvatarProperties.Partner);
+            PlayerPrefs.SetInt("AvatarProperties_Gender", (int)data.AvatarProperties.Gender);
+            PlayerPrefs.SetInt("AvatarProperties_BodyType", (int)data.AvatarProperties.BodyType);
+            PlayerPrefs.SetString("AvatarProperties_Base64Image", data.AvatarProperties.Base64Image);
+            PlayerPrefs.SetString("AvatarCreatorData_IsExistingAvatar", data.IsExistingAvatar.ToString());
         }
     }
 }

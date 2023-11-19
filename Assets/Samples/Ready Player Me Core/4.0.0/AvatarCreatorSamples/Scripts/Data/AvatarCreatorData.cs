@@ -15,18 +15,15 @@ namespace ReadyPlayerMe
             AvatarProperties = new AvatarProperties();
         }
 
-        // [ContextMenu("StartSerialization")]
-        // public void StartSerialization()
-        // {
-        //     string json = JsonUtility.ToJson(AvatarProperties, true);
-        //     Debug.Log(json);
-        //     if (AvatarProperties.Assets.Count >= 1)
-        //     {
-        //         foreach (KeyValuePair<Category, object> item in AvatarProperties.Assets)
-        //         {
-        //             Debug.Log($"{item.Key} {item.Value}");
-        //         }
-        //     }
-        // }
+
+        public void ResetAllFields()
+        {
+            AvatarProperties.Id = string.Empty;
+            AvatarProperties.Base64Image = string.Empty;
+            AvatarProperties.Partner = string.Empty;
+            AvatarProperties.BodyType = Core.BodyType.None;
+            AvatarProperties.Gender = Core.OutfitGender.None;
+            AvatarProperties.Assets = null;
+        }
     }
 }

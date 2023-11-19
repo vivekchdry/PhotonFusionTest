@@ -1,10 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
 using ReadyPlayerMe;
+using ReadyPlayerMe.AvatarCreator;
 using ReadyPlayerMe.Core;
 using ReadyPlayerMe.Core.WebView;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class FetchAvatarSavedInformation : MonoBehaviour
@@ -12,7 +16,8 @@ public class FetchAvatarSavedInformation : MonoBehaviour
     public static FetchAvatarSavedInformation instance;
     public AvatarCreatorData avatarCreatorData;
     public LoadingManager loadingManager;
-
+    public event Action<bool> onAvatarFoundOrNot;
+    public UnityEvent Ue_ControlOthersExecution;
 
     private void Awake()
     {
@@ -21,11 +26,18 @@ public class FetchAvatarSavedInformation : MonoBehaviour
         DontDestroyOnLoad(this);
 
     }
-
-    private void Start()
+    private void OnEnable()
     {
-        StartCoroutine(CustomStart());
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            Ue_ControlOthersExecution?.Invoke();
+        }
     }
+
+    // private void Start()
+    // {
+    //     StartCoroutine(CustomStart());
+    // }
 
     public IEnumerator CustomStart()
     {
@@ -40,23 +52,18 @@ public class FetchAvatarSavedInformation : MonoBehaviour
             yield return new WaitForSeconds(1f);
             loadingManager.EnableLoading("Existing avatar found.", LoadingManager.LoadingType.Fullscreen, true);
             yield return new WaitForSeconds(1f);
-            loadingManager.EnableLoading("Loading into lobby.", LoadingManager.LoadingType.Fullscreen, true);
-            yield return new WaitForSeconds(1f);
             loadingManager.DisableLoading();
-            yield return new WaitForSeconds(0.5f);
-            SceneManager.LoadScene("LobbyScene");
 
+            onAvatarFoundOrNot?.Invoke(true);
         }
         else
         {
             yield return new WaitForSeconds(1f);
             loadingManager.EnableLoading("No existing avatar found.", LoadingManager.LoadingType.Fullscreen, true);
             yield return new WaitForSeconds(1f);
-            loadingManager.EnableLoading("Loading avatar creator", LoadingManager.LoadingType.Fullscreen, true);
-            yield return new WaitForSeconds(1f);
             loadingManager.DisableLoading();
-            yield return new WaitForSeconds(0.5f);
-            SceneManager.LoadScene("AvatarCreatorSample");
+
+            onAvatarFoundOrNot?.Invoke(false);
         }
     }
 
@@ -124,5 +131,28 @@ public class FetchAvatarSavedInformation : MonoBehaviour
         {
             return false;
         }
+    }
+
+    public void ResetSavedAvatarInformation()
+    {
+
+        PlayerPrefs.DeleteKey("AvatarProperties_Id");
+        PlayerPrefs.DeleteKey("AvatarProperties_Partner");
+        PlayerPrefs.DeleteKey("AvatarProperties_Gender");
+        PlayerPrefs.DeleteKey("AvatarProperties_BodyType");
+        PlayerPrefs.DeleteKey("AvatarProperties_Base64Image");
+        PlayerPrefs.DeleteKey("AvatarCreatorData_IsExistingAvatar");
+
+        avatarCreatorData.ResetAllFields();
+    }
+
+    public static void SaveAvatarInformationLocally(AvatarCreatorData data)
+    {
+        PlayerPrefs.SetString("AvatarProperties_Id", data.AvatarProperties.Id);
+        PlayerPrefs.SetString("AvatarProperties_Partner", data.AvatarProperties.Partner);
+        PlayerPrefs.SetInt("AvatarProperties_Gender", (int)data.AvatarProperties.Gender);
+        PlayerPrefs.SetInt("AvatarProperties_BodyType", (int)data.AvatarProperties.BodyType);
+        PlayerPrefs.SetString("AvatarProperties_Base64Image", data.AvatarProperties.Base64Image);
+        PlayerPrefs.SetString("AvatarCreatorData_IsExistingAvatar", data.IsExistingAvatar.ToString());
     }
 }

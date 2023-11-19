@@ -25,16 +25,17 @@ public class Player : NetworkBehaviour, IAfterSpawned
     private RpmCustomAvatarManager rpmCustomAvatarManager;
 
 
-
     public void AfterSpawned()
     {
         Debug.Log("AfterSpawned PlayerCode");
+
         InitialSetup();
 
     }
 
     public void InitialSetup()
     {
+        //RPC_SetAvatar();
         if (networkObject.HasInputAuthority)
         {
             Debug.Log("InitialSetup PlayerCode");
@@ -123,6 +124,17 @@ public class Player : NetworkBehaviour, IAfterSpawned
             myWorldCanvas.transform.LookAt(targetPosition);
             myWorldCanvas.transform.Rotate(0, 180, 0);
         }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SetAvatar()
+    {
+        Debug.Log("RPC_SetAvatar Player");
+        // if (rpmCustomAvatarManager == null)
+        // {
+        //     rpmCustomAvatarManager = GetComponent<RpmCustomAvatarManager>();
+        // }
+        rpmCustomAvatarManager.Init();
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]

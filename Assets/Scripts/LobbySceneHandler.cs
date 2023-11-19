@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using EasyUI.Toast;
 using System;
 using ReadyPlayerMe;
+using DG.Tweening;
+
 
 public class LobbySceneHandler : MonoBehaviour
 {
@@ -22,11 +24,11 @@ public class LobbySceneHandler : MonoBehaviour
     public Button Button_hostNewGame;
     public Button Button_enterSessionBrowser;
     public Slider Slider_playerCount;
-    public GameObject Panel_hostOrJoinSession;
-    public GameObject Panel_lisAllSessions;
+    public RectTransform Panel_hostOrJoinSession;
+    public RectTransform Panel_lisAllSessions;
 
     public GameObject LoadingAnimationObject;
-    public GameObject CreateSessionObject;
+    public RectTransform CreateSessionObject;
 
     public string customSessionName { get; private set; }
     public int customSessionPlayerCount { get; private set; }
@@ -107,14 +109,23 @@ public class LobbySceneHandler : MonoBehaviour
 
     public void ShowPanel_HostOrJoinSession()
     {
+        Panel_hostOrJoinSession.localScale = Vector3.zero;
+        Panel_lisAllSessions.localScale = Vector3.zero;
+
         Panel_hostOrJoinSession.gameObject.SetActive(true);
+        Panel_hostOrJoinSession.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutCirc).SetDelay(0.1f).SetAutoKill(true);
+
         Panel_lisAllSessions.gameObject.SetActive(false);
     }
 
     public void ShowPanel_ListAllSession()
     {
+        Panel_hostOrJoinSession.localScale = Vector3.zero;
+        Panel_lisAllSessions.localScale = Vector3.zero;
+
         Panel_hostOrJoinSession.gameObject.SetActive(false);
         Panel_lisAllSessions.gameObject.SetActive(true);
+        Panel_lisAllSessions.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutCirc).SetDelay(0.1f).SetAutoKill(true);
 
     }
 
@@ -139,8 +150,11 @@ public class LobbySceneHandler : MonoBehaviour
         Button_createNewSession.interactable = false;
         Button_hostNewGame.interactable = false;
         Button_enterSessionBrowser.interactable = false;
+        Panel_hostOrJoinSession.localScale = Vector3.zero;
+        Panel_lisAllSessions.localScale = Vector3.zero;
         Panel_hostOrJoinSession.gameObject.SetActive(true);
         Panel_lisAllSessions.gameObject.SetActive(false);
+        Panel_hostOrJoinSession.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutCirc).SetDelay(0.1f).SetAutoKill(true);
         Text_playerDisplayName.text = string.Empty;
         Slider_playerCount.minValue = 2;
         Slider_playerCount.maxValue = 10;
@@ -149,7 +163,8 @@ public class LobbySceneHandler : MonoBehaviour
         playerCountSliderDisplay.text = $"{customSessionPlayerCount}";
         Input_sessionName.text = string.Empty;
         Input_playerName.text = string.Empty;
-        CreateSessionObject.SetActive(false);
+        CreateSessionObject.gameObject.SetActive(false);
+        CreateSessionObject.localScale = Vector3.zero;
         //playerInGameName = string.Empty;
         networkRunnerHandler = FindAnyObjectByType<NetworkRunnerHandler>();
 
@@ -189,7 +204,16 @@ public class LobbySceneHandler : MonoBehaviour
         playerCountSliderDisplay.text = $"{customSessionPlayerCount}";
         Button_hostNewGame.interactable = false;
         Input_sessionName.text = string.Empty;
-        CreateSessionObject.SetActive(show);
+        CreateSessionObject.localScale = Vector3.zero;
+        CreateSessionObject.gameObject.SetActive(show);
+        if (show)
+        {
+            CreateSessionObject.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutCirc).SetDelay(0.1f).SetAutoKill(true);
+        }
+        else
+        {
+            CreateSessionObject.DOScale(Vector3.zero, 0.25f).SetEase(Ease.OutSine).SetAutoKill(true);
+        }
     }
 
 }
