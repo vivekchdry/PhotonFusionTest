@@ -97,7 +97,7 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             return;
         }
-        Debug.Log($"{nameof(InputHandler)} OnInput");
+        //!notneedednow Debug.Log($"{nameof(InputHandler)} OnInput");
         NetworkInputData myInput = new NetworkInputData();
 
         myInput.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);

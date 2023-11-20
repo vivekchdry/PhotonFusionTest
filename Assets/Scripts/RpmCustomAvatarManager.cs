@@ -5,7 +5,7 @@ using Fusion;
 using ReadyPlayerMe.Core;
 using UnityEngine;
 
-public class RpmCustomAvatarManager : MonoBehaviour
+public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
 {
     private readonly Vector3 avatarPositionOffset = new Vector3(0, 0, 0);
     private readonly Vector3 avatarScaleOffset = new Vector3(2, 2, 2);
@@ -17,9 +17,9 @@ public class RpmCustomAvatarManager : MonoBehaviour
     private static readonly int FreeFallHash = Animator.StringToHash("FreeFall");
     private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
 
-    [SerializeField]
-    [Tooltip("RPM avatar ID")]
-    private string avatarId;
+    // [SerializeField]
+    // [Tooltip("RPM avatar ID")]
+    // private string avatarId;
     [SerializeField]
     [Tooltip("RPM avatar URL or shortcode to load")]
     private string avatarUrl;
@@ -41,43 +41,74 @@ public class RpmCustomAvatarManager : MonoBehaviour
     public bool avatarReady = false;
     public float playerCurrentMagnitude;
     public NetworkObject networkObject;
-    //public Transform mainParent;
+    public Transform mainParent;
+    public PlayerRef playerRef;
 
-    private void OnEnable()
+    [Networked(OnChanged = nameof(OnAvatarIdChanged))] public NetworkString<_128> avatarId { get; set; }
+    public static void OnAvatarIdChanged(Changed<RpmCustomAvatarManager> changed)
     {
-        networkObject = GetComponent<NetworkObject>();
+        changed.Behaviour.avatarId = changed.Behaviour.avatarId.ToString();
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SetAvatarId(string m_avatarId, RpcInfo info = default)
+    {
+        avatarId = m_avatarId;
+    }
+
+    public void AfterSpawned()
+    {
+        //Debug.Log("AfterSpawned rpmCustomAvatarManager");
+        //if (networkObject.Runner.LocalPlayer)//(playerRef))
+
+        if (networkObject == null)
+        {
+            networkObject = this.GetComponent<NetworkObject>();
+        }
+
+        transform.name = networkObject.Id.ToString();
+        Debug.Log("AfterSpawned rpmCustomAvatarManager " + transform.name);
+
+        if (networkObject.HasInputAuthority)
+        {
+            FetchAvatarSavedInformation.instance.CheckAvatarExists();
+            avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
+            Debug.Log($"AfterSpawned rpmCustomAvatarManager  {avatarId} {transform.name}");
+            RPC_SetAvatarId(avatarId.ToString());
+        }
     }
 
     public void Init()
     {
-        if (networkObject.HasInputAuthority)
+        Debug.Log($"RpmCustomAvatarManager Init {avatarId} {transform.name}");
+        //if (networkObject.HasInputAuthority)
+        //{
+        //StartCoroutine(FetchAvatarSavedInformation.instance.CustomStart());
+        // FetchAvatarSavedInformation.instance.CheckAvatarExists();
+        // avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
+        // RPC_SetAvatarId(avatarId.ToString());
+
+        avatarReady = false;
+        if (networkCharacterControllerPrototype == null)
         {
-            Debug.Log("RpmCustomAvatarManager Init");
-            //StartCoroutine(FetchAvatarSavedInformation.instance.CustomStart());
-            FetchAvatarSavedInformation.instance.CheckAvatarExists();
-
-            avatarReady = false;
-            if (networkCharacterControllerPrototype == null)
-            {
-                networkCharacterControllerPrototype = GetComponent<NetworkCharacterControllerPrototype>();
-            }
-
-            avatarObjectLoader = new AvatarObjectLoader();
-            avatarObjectLoader.OnCompleted += OnLoadCompleted;
-            avatarObjectLoader.OnFailed += OnLoadFailed;
-            avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
-            avatarUrl = $"https://models.readyplayer.me/{avatarId}.glb";
-
-            LoadAvatar(avatarUrl);
-
-
-            // if (previewAvatar != null)
-            // {
-            //     SetupAvatar(previewAvatar);
-            // }
-
-
+            networkCharacterControllerPrototype = mainParent.GetComponent<NetworkCharacterControllerPrototype>();
         }
+
+        //}
+        avatarObjectLoader = new AvatarObjectLoader();
+        avatarObjectLoader.OnCompleted += OnLoadCompleted;
+        avatarObjectLoader.OnFailed += OnLoadFailed;
+        avatarUrl = $"https://models.readyplayer.me/{avatarId.ToString()}.glb";
+
+        LoadAvatar(avatarUrl);
+
+
+        // if (previewAvatar != null)
+        // {
+        //     SetupAvatar(previewAvatar);
+        // }
+
+
     }
     private void OnLoadFailed(object sender, FailureEventArgs args)
     {
@@ -92,11 +123,13 @@ public class RpmCustomAvatarManager : MonoBehaviour
 
     private void SetupAvatar(GameObject targetAvatar)
     {
+        //if (networkObject.HasStateAuthority)
+        //{
+
         if (avatar != null)
         {
             Destroy(avatar);
         }
-
 
         avatar = targetAvatar;
 
@@ -111,6 +144,7 @@ public class RpmCustomAvatarManager : MonoBehaviour
         animator.applyRootMotion = false;
 
         avatarReady = true;
+        //}
     }
 
     public void LoadAvatar(string url)
@@ -120,16 +154,8 @@ public class RpmCustomAvatarManager : MonoBehaviour
         avatarObjectLoader.LoadAvatar(avatarUrl);
     }
 
-    private void Update()
+    public override void FixedUpdateNetwork()
     {
-        if (!avatarReady)
-        {
-            return;
-        }
-        if (animator == null)
-        {
-            return;
-        }
         UpdateAnimator();
     }
 
@@ -144,6 +170,16 @@ public class RpmCustomAvatarManager : MonoBehaviour
 
     public void UpdateAnimator()
     {
+
+        if (!avatarReady)
+        {
+            return;
+        }
+        if (animator == null)
+        {
+            return;
+        }
+
         var isGrounded = networkCharacterControllerPrototype.IsGrounded;
         animator.SetFloat(MoveSpeedHash, playerCurrentMagnitude * networkCharacterControllerPrototype.maxSpeed);
         animator.SetBool(IsGroundedHash, isGrounded);
@@ -156,7 +192,7 @@ public class RpmCustomAvatarManager : MonoBehaviour
         {
             if (fallTimeoutDelta >= 0.0f)
             {
-                fallTimeoutDelta -= Time.deltaTime;
+                fallTimeoutDelta -= Runner.DeltaTime;
             }
             else
             {

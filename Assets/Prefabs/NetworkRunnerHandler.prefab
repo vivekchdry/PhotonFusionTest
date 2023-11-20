@@ -48,8 +48,13 @@ MonoBehaviour:
   Prefab_networkPlayerSpawner: {fileID: 5526525606866614749, guid: d94d8713d8a97d34e96326e466bb8b88,
     type: 3}
   networkRunner: {fileID: 6421534131999485432}
+  lobbySceneHandler: {fileID: 0}
+  sessionListHandler: {fileID: 0}
+  playerInGameName: 
   _playerPrefab:
     RawGuidValue: ce2a32d5d468a904e9fa06aebf54b111
+  playerRpmPrefab:
+    RawGuidValue: 8b0c2ed1f8fa4254eaf544b340bbd2bd
 --- !u!114 &6421534131999485432
 MonoBehaviour:
   m_ObjectHideFlags: 0

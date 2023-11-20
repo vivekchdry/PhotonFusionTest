@@ -21,34 +21,45 @@ public class Player : NetworkBehaviour, IAfterSpawned
     [Networked(OnChanged = nameof(OnMessageToShowChanged))] public NetworkString<_128> messageToShow { get; set; }
     [Networked(OnChanged = nameof(OnSettingPlayerInGameName))] public NetworkString<_64> playerInGameName { get; set; }
     private IEnumerator coroutineTimed;
+
+    public RpmCustomAvatarManager rpmCustomAvatarManager;
     [SerializeField]
-    private RpmCustomAvatarManager rpmCustomAvatarManager;
+    private Transform lookAtMe;
 
 
     public void AfterSpawned()
     {
-        Debug.Log("AfterSpawned PlayerCode");
+        //Debug.Log("AfterSpawned PlayerCode");
 
-        InitialSetup();
+        transform.name = networkObject.Id.ToString();
+        Debug.Log("AfterSpawned PlayerCode " + transform.name);
+
+        StartCoroutine(InitialSetup());
 
     }
 
-    public void InitialSetup()
+    public IEnumerator InitialSetup()
     {
+
         //RPC_SetAvatar();
+        // if (rpmCustomAvatarManager == null)
+        // {
+        //     rpmCustomAvatarManager = transform.GetChild(2).GetComponent<RpmCustomAvatarManager>();
+        // }
+
+        //yield return new WaitUntil(() => rpmCustomAvatarManager != null);
+        yield return new WaitForSeconds(1);
+
+        rpmCustomAvatarManager.Init();
+
         if (networkObject.HasInputAuthority)
         {
-            Debug.Log("InitialSetup PlayerCode");
-            if (rpmCustomAvatarManager == null)
-            {
-                rpmCustomAvatarManager = GetComponent<RpmCustomAvatarManager>();
-            }
-            rpmCustomAvatarManager.Init();
+            //!notneedednow Debug.Log("InitialSetup PlayerCode");
             coroutineTimed = null;
             if (HudManager.instance != null)
             {
-                HudManager.instance.cinemachineFreeLook.m_Follow = networkObject.transform.GetChild(0).transform;
-                HudManager.instance.cinemachineFreeLook.m_LookAt = networkObject.transform.GetChild(0).transform;
+                HudManager.instance.cinemachineFreeLook.m_Follow = lookAtMe;// networkObject.transform.GetChild(0).transform;
+                HudManager.instance.cinemachineFreeLook.m_LookAt = lookAtMe;// networkObject.transform.GetChild(0).transform;
             }
 
             myWorldCanvas = networkObject.transform.GetChild(1).transform;
@@ -85,18 +96,25 @@ public class Player : NetworkBehaviour, IAfterSpawned
             {
                 //rpmCustomAvatarManager.ControlMoveAnimation(input.direction.magnitude * networkCharacterControllerPrototype.maxSpeed);
                 rpmCustomAvatarManager.playerCurrentMagnitude = input.direction.magnitude;
+                //rpmCustomAvatarManager.UpdateAnimator();
             }
 
             if (input.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
             {
 
                 networkCharacterControllerPrototype.Jump(false);
-                rpmCustomAvatarManager.OnJump();
+                if (rpmCustomAvatarManager != null)
+                {
+                    rpmCustomAvatarManager.OnJump();
+                }
                 HudManager.instance.jumpButtonPressed = false;
                 if (networkObject.HasInputAuthority && HudManager.instance != null)
                 {
                     input.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);
-                    rpmCustomAvatarManager.TryJump();
+                    if (rpmCustomAvatarManager != null)
+                    {
+                        rpmCustomAvatarManager.TryJump();
+                    }
                 }
 
             }
@@ -129,7 +147,7 @@ public class Player : NetworkBehaviour, IAfterSpawned
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SetAvatar()
     {
-        Debug.Log("RPC_SetAvatar Player");
+        //!notneedednow Debug.Log("RPC_SetAvatar Player");
         // if (rpmCustomAvatarManager == null)
         // {
         //     rpmCustomAvatarManager = GetComponent<RpmCustomAvatarManager>();
@@ -140,7 +158,7 @@ public class Player : NetworkBehaviour, IAfterSpawned
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SetNickname(string playerName, RpcInfo info = default)
     {
-        Debug.Log("RPC_SetNickname Player");
+        //!notneedednow Debug.Log("RPC_SetNickname Player");
         playerInGameName = playerName;
 
     }
@@ -151,7 +169,7 @@ public class Player : NetworkBehaviour, IAfterSpawned
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SendMessage(string message, RpcInfo info = default)
     {
-        Debug.Log("RPC_SendMessage PlayerCode");
+        //!notneedednow Debug.Log("RPC_SendMessage PlayerCode");
 
         messageToShow = message;
 
