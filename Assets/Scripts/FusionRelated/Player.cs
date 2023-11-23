@@ -6,7 +6,7 @@ using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
 
-public class Player : NetworkBehaviour, IAfterSpawned
+public class Player : NetworkBehaviour//, IAfterSpawned
 {
     public NetworkCharacterControllerPrototype networkCharacterControllerPrototype;
     public NetworkObject networkObject;
@@ -25,18 +25,25 @@ public class Player : NetworkBehaviour, IAfterSpawned
     public RpmCustomAvatarManager rpmCustomAvatarManager;
     [SerializeField]
     private Transform lookAtMe;
+    public float maxMoveSpeed;
 
 
-    public void AfterSpawned()
+    public override void Spawned()
     {
+        //Debug.Log("Spawned PlayerCode");
         //Debug.Log("AfterSpawned PlayerCode");
 
         transform.name = networkObject.Id.ToString();
-        Debug.Log("AfterSpawned PlayerCode " + transform.name);
+        //Debug.Log("AfterSpawned PlayerCode " + transform.name);
 
         StartCoroutine(InitialSetup());
 
     }
+
+    // public override void Spawned()
+    // {
+    //     Debug.Log("Spawned PlayerCode");
+    // }
 
     public IEnumerator InitialSetup()
     {
@@ -48,7 +55,7 @@ public class Player : NetworkBehaviour, IAfterSpawned
         // }
 
         //yield return new WaitUntil(() => rpmCustomAvatarManager != null);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(2);
 
         rpmCustomAvatarManager.Init();
 
@@ -89,32 +96,37 @@ public class Player : NetworkBehaviour, IAfterSpawned
         if (GetInput(out NetworkInputData input))
         {
 
-            input.direction.Normalize();
-            networkCharacterControllerPrototype.Move(input.direction * Runner.DeltaTime);
+            networkCharacterControllerPrototype.Move(input.direction.normalized);
 
             if (rpmCustomAvatarManager != null)
             {
                 //rpmCustomAvatarManager.ControlMoveAnimation(input.direction.magnitude * networkCharacterControllerPrototype.maxSpeed);
-                rpmCustomAvatarManager.playerCurrentMagnitude = input.direction.magnitude;
-                //rpmCustomAvatarManager.UpdateAnimator();
+                //Debug.Log("input.direction.normalized.magnitude " + input.direction.normalized.magnitude);
+                //Debug.Log("input.direction.magnitude " + input.direction.magnitude);
+                //rpmCustomAvatarManager.playerCurrentMagnitude = input.direction.magnitude;
+                rpmCustomAvatarManager.playerCurrentMagnitude = input.direction.normalized.magnitude;
             }
 
             if (input.OnScreenButtons.IsSet(HudButtons.JUMP_BUTTON))
             {
 
                 networkCharacterControllerPrototype.Jump(false);
+
+                // if (rpmCustomAvatarManager != null)
+                // {
+                //     rpmCustomAvatarManager.OnJump();
+                // }
                 if (rpmCustomAvatarManager != null)
                 {
-                    rpmCustomAvatarManager.OnJump();
+                    rpmCustomAvatarManager.jumpTrigger = true;
                 }
+
                 HudManager.instance.jumpButtonPressed = false;
+
                 if (networkObject.HasInputAuthority && HudManager.instance != null)
                 {
                     input.OnScreenButtons.Set(HudButtons.JUMP_BUTTON, HudManager.instance.jumpButtonPressed);
-                    if (rpmCustomAvatarManager != null)
-                    {
-                        rpmCustomAvatarManager.TryJump();
-                    }
+                    //rpmCustomAvatarManager.TryJump();
                 }
 
             }
@@ -129,6 +141,13 @@ public class Player : NetworkBehaviour, IAfterSpawned
                 }
             }
 
+        }
+        if (networkCharacterControllerPrototype.IsGrounded)
+        {
+            if (rpmCustomAvatarManager != null)
+            {
+                rpmCustomAvatarManager.jumpTrigger = false;
+            }
         }
 
         if (networkObject.HasInputAuthority && HudManager.instance != null)

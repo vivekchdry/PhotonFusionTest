@@ -35,6 +35,7 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
+#if UNITY_EDITOR
         if (forceJoystickInput)
         {
             GetInputDataFromJoystick();
@@ -43,6 +44,9 @@ public class InputHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             GetInputDataFromKeyboard();
         }
+#else
+            GetInputDataFromJoystick();
+#endif
 
 
     }

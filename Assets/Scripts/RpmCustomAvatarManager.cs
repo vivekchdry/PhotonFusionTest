@@ -5,7 +5,7 @@ using Fusion;
 using ReadyPlayerMe.Core;
 using UnityEngine;
 
-public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
+public class RpmCustomAvatarManager : NetworkBehaviour//, IAfterSpawned
 {
     private readonly Vector3 avatarPositionOffset = new Vector3(0, 0, 0);
     private readonly Vector3 avatarScaleOffset = new Vector3(2, 2, 2);
@@ -39,7 +39,13 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
 
     public event Action OnLoadComplete;
     public bool avatarReady = false;
-    public float playerCurrentMagnitude;
+    //public float playerCurrentMagnitude;
+    [Networked] public float playerCurrentMagnitude { get; set; }
+    // [Networked(OnChanged = nameof(OnplayerCurrentMagnitudeChanged))] public float playerCurrentMagnitude { get; set; }
+    // public static void OnplayerCurrentMagnitudeChanged(Changed<RpmCustomAvatarManager> changed)
+    // {
+    //     changed.Behaviour.playerCurrentMagnitude = changed.Behaviour.playerCurrentMagnitude;
+    // }
     public NetworkObject networkObject;
     public Transform mainParent;
     public PlayerRef playerRef;
@@ -55,28 +61,38 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
     {
         avatarId = m_avatarId;
     }
+    //public NetworkMecanimAnimator networkMecanimAnimator;
 
-    public void AfterSpawned()
+    public override void Spawned()
     {
+
+        //Debug.Log("Spawned RpmCustomAvatarManager");
         //Debug.Log("AfterSpawned rpmCustomAvatarManager");
         //if (networkObject.Runner.LocalPlayer)//(playerRef))
 
         if (networkObject == null)
         {
             networkObject = this.GetComponent<NetworkObject>();
+
         }
 
+
         transform.name = networkObject.Id.ToString();
-        Debug.Log("AfterSpawned rpmCustomAvatarManager " + transform.name);
+        //Debug.Log("AfterSpawned rpmCustomAvatarManager " + transform.name);
 
         if (networkObject.HasInputAuthority)
         {
             FetchAvatarSavedInformation.instance.CheckAvatarExists();
             avatarId = FetchAvatarSavedInformation.instance.avatarCreatorData.AvatarProperties.Id;
-            Debug.Log($"AfterSpawned rpmCustomAvatarManager  {avatarId} {transform.name}");
+            //Debug.Log($"AfterSpawned rpmCustomAvatarManager  {avatarId} {transform.name}");
             RPC_SetAvatarId(avatarId.ToString());
         }
     }
+
+    // public override void Spawned()
+    // {
+    //     Debug.Log("Spawned RpmCustomAvatarManager");
+    // }
 
     public void Init()
     {
@@ -93,6 +109,10 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
         {
             networkCharacterControllerPrototype = mainParent.GetComponent<NetworkCharacterControllerPrototype>();
         }
+        // if (networkMecanimAnimator == null)
+        // {
+        //     networkMecanimAnimator = GetComponent<NetworkMecanimAnimator>();
+        // }
 
         //}
         avatarObjectLoader = new AvatarObjectLoader();
@@ -142,8 +162,21 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
         animator.runtimeAnimatorController = animatorController;
 
         animator.applyRootMotion = false;
+        // if (networkMecanimAnimator == null)
+        // {
+        //     Debug.Log($"{networkMecanimAnimator} NULL");
+        //     avatar.gameObject.AddComponent<NetworkMecanimAnimator>();//.Animator = animator;
+        //     networkMecanimAnimator = avatar.gameObject.GetComponent<NetworkMecanimAnimator>();
+        //     //networkMecanimAnimator.Animator = animator;
+        // }
+        // if (networkMecanimAnimator == null)
+        // {
+        //     Debug.Log($"{networkMecanimAnimator} STILL NULL");
+        // }
+        //networkMecanimAnimator.Animator = animator;
 
         avatarReady = true;
+        // Debug.Log($"{MoveSpeedHash} {JumpHash} {FreeFallHash} {IsGroundedHash}");
         //}
     }
 
@@ -159,14 +192,15 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
         UpdateAnimator();
     }
 
-    public void ControlMoveAnimation(float value)
-    {
-        if (animator != null)
-        {
-            Debug.Log(value);
-            animator.SetFloat(MoveSpeedHash, value);
-        }
-    }
+    // public void ControlMoveAnimation(float value)
+    // {
+    //     if (animator != null)
+    //     {
+    //         Debug.Log(value);
+    //         animator.SetFloat(MoveSpeedHash, value);
+    //     }
+    // }
+
 
     public void UpdateAnimator()
     {
@@ -175,6 +209,14 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
         {
             return;
         }
+        // if (networkMecanimAnimator == null)
+        // {
+        //     return;
+        // }
+        // if (networkMecanimAnimator.Animator == null)
+        // {
+        //     return;
+        // }
         if (animator == null)
         {
             return;
@@ -199,14 +241,58 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
                 animator.SetBool(FreeFallHash, true);
             }
         }
+
     }
     public void OnJump()
     {
-        if (TryJump() && animator != null)
+        if (!jumpTrigger && animator != null)
         {
-            animator.SetTrigger(JumpHash);
+            TryJump();
         }
     }
+    // public override void Render()
+    // {
+
+    //     if (!avatarReady)
+    //     {
+    //         return;
+    //     }
+    //     if (animator == null)
+    //     {
+    //         return;
+    //     }
+    //     if (Runner.IsForward == false)
+    //     {
+    //         return;
+    //     }
+
+    //     // if (jumpTrigger && animator != null)
+    //     // {
+    //     //     networkMecanimAnimator.Animator.SetTrigger(JumpHash);
+    //     //     jumpTrigger = false;
+    //     // }
+
+    //     var isGrounded = networkCharacterControllerPrototype.IsGrounded;
+    //     networkMecanimAnimator.Animator.SetFloat(MoveSpeedHash, playerCurrentMagnitude * networkCharacterControllerPrototype.maxSpeed);
+    //     networkMecanimAnimator.Animator.SetBool(IsGroundedHash, isGrounded);
+    //     if (isGrounded)
+    //     {
+    //         fallTimeoutDelta = FALL_TIMEOUT;
+    //         networkMecanimAnimator.Animator.SetBool(FreeFallHash, false);
+    //     }
+    //     else
+    //     {
+    //         if (fallTimeoutDelta >= 0.0f)
+    //         {
+    //             fallTimeoutDelta -= Runner.DeltaTime;
+    //         }
+    //         else
+    //         {
+    //             networkMecanimAnimator.Animator.SetBool(FreeFallHash, true);
+    //         }
+    //     }
+    //     //Debug.Log($"{MoveSpeedHash} {JumpHash} {FreeFallHash} {IsGroundedHash}");
+    // }
 
     public bool TryJump()
     {
@@ -214,6 +300,7 @@ public class RpmCustomAvatarManager : NetworkBehaviour, IAfterSpawned
         if (networkCharacterControllerPrototype.IsGrounded)
         {
             jumpTrigger = true;
+            networkCharacterControllerPrototype.Jump(false);
         }
         return jumpTrigger;
     }
